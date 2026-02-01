@@ -65,4 +65,34 @@ Autentica o usuário e retorna o token de acesso (JWT).
   }
 }
 ```
+## Gestão de Pastas (Pacotes)
 
+### 1. Criar Pacote de Entrega
+Cria a estrutura de pastas no Drive e vincula ao usuário.
+- **Rota:** `POST /api/folders/create`
+- **Auth:** Necessário Bearer Token.
+- **Body:**
+  ```json
+  {
+    "title": "Avaliação P1 - Projetos",
+    "disciplineId": 2
+  }
+
+#### Retorno (201)
+```json
+{
+  "success": true,
+  "folder": {
+    "id": 15,
+    "title": "Avaliação P1 - Projetos",
+    "driveLink": "https://drive.google.com/..."
+  }
+}
+```
+
+#### 2. Listar Meus Pacotes
+Retorna todos os pacotes de documentos criados pelo professor logado.
+
+Rota: GET /api/folders/my-folders
+
+Autenticação: Bearer Token (JWT obrigatório)

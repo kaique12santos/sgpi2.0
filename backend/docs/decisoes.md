@@ -48,3 +48,11 @@
 - **Segurança Centralizada:** Garante que a lógica de verificação de token esteja em um único lugar. Se precisarmos mudar a chave secreta ou o algoritmo de criptografia, alteramos apenas um arquivo.
 - **Injeção de Dependência:** O middleware é responsável por identificar *quem* é o usuário e anexar essa informação (`req.userId`) ao objeto da requisição, permitindo que os Controllers foquem apenas na regra de negócio sem se preocupar em "decifrar" tokens.
 - **Padrão Bearer:** Adoção do padrão standard de mercado `Authorization: Bearer <token>`.
+
+## 7. Estratégia de Hierarquia de Pastas (Drive)
+**Data:** 01/02/2026
+**Decisão:** Espelhamento automático da estrutura acadêmica.
+**Motivação:**
+- Para evitar desorganização no Google Drive, o sistema impõe uma estrutura rígida: `Semestre (Raiz) > Disciplina > Pacote de Entrega`.
+- O sistema verifica a existência de cada nível antes de criar o próximo. Se a pasta "2025_1" não existir, ela é criada. Se "Designer Digital" não existir dentro de "2025_1", é criada.
+- Isso remove a responsabilidade do usuário de organizar arquivos e garante padronização para o backup futuro.

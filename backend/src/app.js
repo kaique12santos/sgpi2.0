@@ -3,7 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
 
-
+const folderRoutes = require('./routes/folderRoutes');
 const authRoutes = require('./routes/authRoutes');
 
 // Importação das Rotas (Futuro)
@@ -52,6 +52,7 @@ class App {
         });
 
         this.app.use('/api/auth', authRoutes);
+        this.app.use('/api/folders', folderRoutes);
     }
 }
 
