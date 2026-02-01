@@ -6,6 +6,7 @@ const path = require('path');
 const folderRoutes = require('./routes/folderRoutes');
 const authRoutes = require('./routes/authRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const downloadRoutes = require('./routes/downloadRoutes');
 
 // Importação das Rotas (Futuro)
 // const authRoutes = require('./routes/authRoutes');
@@ -55,6 +56,7 @@ class App {
         this.app.use('/api/auth', authRoutes);
         this.app.use('/api/folders', folderRoutes);
         this.app.use('/api/uploads', uploadRoutes);
+        this.app.use('/api/downloads', downloadRoutes);
 
     }
 }

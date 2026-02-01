@@ -64,3 +64,10 @@
 - **Resiliência:** Uploads para o Google Drive podem demorar ou falhar. Não podemos deixar o navegador do usuário travado esperando.
 - **Simplicidade (KISS):** Ao usar o MySQL como fila (Status: PENDING -> UPLOADING -> COMPLETED), evitamos a complexidade de configurar o Redis/RabbitMQ, mantendo a infraestrutura leve.
 - **Recuperação:** Se o servidor reiniciar no meio de um upload, o Worker verifica o banco na inicialização e retoma/reprocessa os arquivos pendentes.
+
+## 9. Estratégia de Download (Streaming ZIP)
+**Data:** 01/02/2026
+**Decisão:** Geração de arquivos .zip em tempo real (On-the-fly) usando Streams.
+**Motivação:**
+- **Performance:** Baixar todos os arquivos do Drive para o disco do servidor antes de entregar ao usuário causaria latência alta e consumo excessivo de disco/memória.
+- **Solução:** Utilizamos a biblioteca `archiver` conectada via Pipe (`.pipe()`) diretamente à resposta HTTP. O servidor atua apenas como um "tubo", pegando os bytes do Google Drive, compactando e enviando ao navegador simultaneamente.

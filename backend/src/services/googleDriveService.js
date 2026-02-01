@@ -92,6 +92,24 @@ class DriveService {
             throw error;
         }
     }
+
+    /**
+     * Obtém o stream de leitura de um arquivo (para download/zip).
+     * @param {string} fileId - ID do arquivo no Drive.
+     * @returns {Promise<Stream>} Stream do arquivo.
+     */
+    async getFileStream(fileId) {
+        try {
+            const response = await this.drive.files.get(
+                { fileId: fileId, alt: 'media' },
+                { responseType: 'stream' }
+            );
+            return response.data;
+        } catch (error) {
+            console.error(`❌ Erro ao obter stream do arquivo ${fileId}:`, error.message);
+            throw error;
+        }
+    }
 }
 
 // Exporta uma instância única (Singleton) já inicializada

@@ -114,3 +114,10 @@ Envia arquivos para a fila de processamento.
       { "id": 45, "name": "diagrama.pdf", "status": "PENDING" }
     ]
   }
+
+### 4. Download de Pacotes
+Gera e baixa um arquivo ZIP contendo todos os documentos aprovados de uma pasta.
+- **Rota:** `GET /api/downloads/folder/:folderId`
+- **Auth:** Necessário Bearer Token.
+- **Retorno:** Arquivo binário (`application/zip`).
+- **Nome do Arquivo:** `Titulo_do_Pacote.zip`

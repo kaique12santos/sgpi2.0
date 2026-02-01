@@ -31,13 +31,20 @@ class DocumentRepository {
     }
 
     // Atualiza o status (Ex: de PENDING para COMPLETED)
+   // Atualiza o status (Ex: de PENDING para COMPLETED)
     async updateStatus(id, status, driveData = {}) {
         let sql = `UPDATE documents SET status = ?`;
         const params = [status];
 
-        if (driveData.drive_file_id) {
+        // Se tiver ID do Drive, atualiza os campos
+        // Verificação reforçada: checa se driveData e driveData.id existem
+        if (driveData && (driveData.id || driveData.drive_file_id)) {
+            // O Google retorna 'id', mas nossa tabela usa 'drive_file_id'
+            // Vamos garantir que pegamos o ID certo independente de como venha
+            const realDriveId = driveData.id || driveData.drive_file_id;
+            
             sql += `, drive_file_id = ?, drive_web_link = ?, drive_download_link = ?`;
-            params.push(driveData.drive_file_id, driveData.webViewLink, driveData.webContentLink);
+            params.push(realDriveId, driveData.webViewLink, driveData.webContentLink);
         }
 
         if (driveData.error) {
@@ -45,7 +52,7 @@ class DocumentRepository {
             params.push(driveData.error);
         }
 
-        // Se completou, limpamos o caminho local pois vamos deletar o arquivo
+        // Se completou, limpamos o caminho local
         if (status === 'COMPLETED') {
             sql += `, local_path = NULL`;
         }
@@ -54,6 +61,17 @@ class DocumentRepository {
         params.push(id);
 
         await Database.query(sql, params);
+    }
+
+    /**
+     * Busca todos os documentos finalizados de uma pasta específica.
+     */
+    async findAllByFolder(folderId) {
+        const sql = `
+            SELECT * FROM documents 
+            WHERE folder_id = ? AND status = 'COMPLETED'
+        `;
+        return await Database.query(sql, [folderId]);
     }
 }
 
