@@ -31,6 +31,12 @@ class SubmissionFolderRepository {
         `;
         return await Database.query(sql, [userId]);
     }
+
+    async findById(id) {
+        const sql = `SELECT * FROM submission_folders WHERE id = ?`;
+        const rows = await Database.query(sql, [id]);
+        return rows[0];
+    }
 }
 
 module.exports = new SubmissionFolderRepository();

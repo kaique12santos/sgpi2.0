@@ -56,3 +56,11 @@
 - Para evitar desorganização no Google Drive, o sistema impõe uma estrutura rígida: `Semestre (Raiz) > Disciplina > Pacote de Entrega`.
 - O sistema verifica a existência de cada nível antes de criar o próximo. Se a pasta "2025_1" não existir, ela é criada. Se "Designer Digital" não existir dentro de "2025_1", é criada.
 - Isso remove a responsabilidade do usuário de organizar arquivos e garante padronização para o backup futuro.
+
+## 8. Estratégia de Upload Assíncrono (Fila)
+**Data:** 01/02/2026
+**Decisão:** Implementação do padrão Producer-Consumer usando tabela de banco de dados (`documents` status) e um Worker rodando no próprio processo Node.js.
+**Motivação:**
+- **Resiliência:** Uploads para o Google Drive podem demorar ou falhar. Não podemos deixar o navegador do usuário travado esperando.
+- **Simplicidade (KISS):** Ao usar o MySQL como fila (Status: PENDING -> UPLOADING -> COMPLETED), evitamos a complexidade de configurar o Redis/RabbitMQ, mantendo a infraestrutura leve.
+- **Recuperação:** Se o servidor reiniciar no meio de um upload, o Worker verifica o banco na inicialização e retoma/reprocessa os arquivos pendentes.

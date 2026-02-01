@@ -96,3 +96,21 @@ Retorna todos os pacotes de documentos criados pelo professor logado.
 Rota: GET /api/folders/my-folders
 
 Autenticação: Bearer Token (JWT obrigatório)
+
+### 3. Upload de Arquivos
+Envia arquivos para a fila de processamento.
+- **Rota:** `POST /api/uploads`
+- **Auth:** Necessário Bearer Token.
+- **Content-Type:** `multipart/form-data`
+- **Campos:**
+  - `folderId`: ID do pacote de entrega (Submission Folder).
+  - `files`: Array de arquivos (Máx 10 por vez, 50MB cada).
+- **Retorno (201):**
+  ```json
+  {
+    "success": true,
+    "message": "2 arquivos colocados na fila de upload.",
+    "documents": [
+      { "id": 45, "name": "diagrama.pdf", "status": "PENDING" }
+    ]
+  }

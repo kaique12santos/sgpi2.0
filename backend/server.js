@@ -5,6 +5,7 @@
  */
 
 const app = require('./src/app');
+const UploadQueueWorker = require('./src/services/UploadQueueWorker');
 // Importação condicional para evitar erro enquanto não movemos o arquivo
 let cleanupService;
 try {
@@ -24,6 +25,10 @@ const PORT = process.env.PORT || 3000;
 if (cleanupService && typeof cleanupService.iniciarAgendamento === 'function') {
     cleanupService.iniciarAgendamento();
 }
+
+// Verifica se ficaram uploads pendentes quando o servidor reiniciou
+UploadQueueWorker.processQueue();
+
 
 /**
  * Inicialização do Servidor HTTP.

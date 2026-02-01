@@ -46,3 +46,12 @@ Componentes interceptadores que atuam entre a **Rota** e o **Controller**.
     - Verifica a existência e validade do Token JWT no Header `Authorization`.
     - Bloqueia requisições não autorizadas (Erro 401) antes que cheguem ao Controller.
     - Decodifica o token e injeta `req.userId` e `req.userRole` para uso posterior.
+
+### 8. Workers (Background Jobs)
+Serviços que rodam em segundo plano, desacoplados da requisição HTTP.
+- **UploadQueueWorker:**
+    - Monitora a tabela `documents`.
+    - Processa arquivos enviados para a pasta temporária local.
+    - Realiza o upload para o Google Drive.
+    - Gerencia retentativas (Retry Logic) em caso de falha de rede.
+    - Limpa o disco local após sucesso.
