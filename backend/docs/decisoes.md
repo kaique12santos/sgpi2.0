@@ -79,3 +79,24 @@
 - **Permissões:** Apenas o **Coordenador** (Admin) ou o **Dono do Arquivo** (Professor que fez upload) podem deletar um documento. Isso impede sabotagem entre professores.
 - **Drive:** Arquivos deletados via sistema são movidos para a **Lixeira** do Google Drive (`trashed: true`) em vez de excluídos permanentemente, permitindo recuperação manual em caso de acidente (Safety Net).
 - **Local:** Arquivos temporários locais são removidos fisicamente (`fs.unlink`) para não lotar o servidor.
+
+## 11. Automação de Manutenção (Cron Jobs)
+**Data:** 01/02/2026
+**Decisão:** Uso de tarefas agendadas (`node-cron`) para manutenção do sistema.
+**Motivação:**
+- **Ciclo de Vida do Semestre:** Para evitar dependência humana, o sistema verifica datas de corte (ex: 15/07) e cria automaticamente as pastas do próximo semestre no Drive e no Banco.
+- **Limpeza de Disco:** Um serviço de limpeza remove arquivos temporários da pasta `uploads/` que tenham mais de 1 hora, prevenindo vazamento de armazenamento em caso de falhas no Worker.
+
+## 12. Segurança de Cadastro (2FV)
+**Data:** 01/02/2026
+**Decisão:** Implementação de verificação de e-mail obrigatória antes do primeiro login.
+**Motivação:**
+- **Integridade:** Evita cadastros de bots ou uso de e-mails de terceiros incorretamente.
+- **Fluxo:** O usuário se cadastra -> Recebe Token (6 dígitos) -> Valida na API -> Acesso liberado.
+- **Bloqueio:** O endpoint de login rejeita (`403 Forbidden`) qualquer conta com `is_verified = 0`.
+
+## 13. Exposição de Metadados
+**Data:** 01/02/2026
+**Decisão:** Criação de endpoints públicos (para usuários logados) de listas auxiliares.
+**Motivação:**
+- **Frontend Driven:** O Frontend não deve ter IDs "hardcoded". Ele deve consultar a API para saber quais disciplinas (`/metadata/disciplines`) e qual semestre (`/metadata/semester`) estão disponíveis, garantindo dinamismo se o banco mudar.

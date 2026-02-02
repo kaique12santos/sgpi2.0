@@ -9,6 +9,7 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const downloadRoutes = require('./routes/downloadRoutes');
 const linkRoutes = require('./routes/linkRoutes');
 const managementRoutes = require('./routes/managementRoutes');
+const metadataRoutes = require('./routes/metadataRoutes');
 
 
 // Importação das Rotas (Futuro)
@@ -62,6 +63,8 @@ class App {
         this.app.use('/api/downloads', downloadRoutes);
         this.app.use('/api/links', linkRoutes);
         this.app.use('/api/management', managementRoutes);
+        this.app.use('/api/metadata', metadataRoutes);
+
 
     }
 }

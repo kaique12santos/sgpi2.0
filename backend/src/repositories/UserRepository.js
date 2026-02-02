@@ -1,4 +1,5 @@
 const Database = require('../config/Database.js');
+const bcrypt = require('bcryptjs');
 /**
  * Repositório responsável pelas operações de banco de dados da tabela 'users'.
  * Segue o padrão de isolamento de dados (Data Access Layer).
@@ -14,16 +15,24 @@ class UserRepository {
      * @param {string} dados.role - Papel do usuário ('professor' ou 'coordenador').
      * @returns {Promise<number>} Retorna o ID do usuário recém-criado.
      */
-    async create({ name, email, password_hash, role }) {
-        const sql = `
-            INSERT INTO users (name, email, password_hash, role)
-            VALUES (?, ?, ?, ?)
-        `;
-        
-        // Database.query retorna [rows, fields], mas para INSERT no mysql2,
-        // o resultado (rows) contém informações como insertId.
-        const result = await Database.query(sql, [name, email, password_hash, role]);
+    async create(user) {
+        const hashedPassword = await bcrypt.hash(user.password, 10);
+        const sql = `INSERT INTO users (name, email, password_hash, role, is_verified, verification_token) VALUES (?, ?, ?, ?, ?, ?)`;
+        // Adicione os novos campos no array de valores
+        const result = await Database.query(sql, [user.name, user.email, hashedPassword, user.role, user.is_verified, user.verification_token]);
         return result.insertId;
+    }
+
+    // Adicione o método update:
+    async update(id, fields) {
+        // Gera query dinâmica: "UPDATE users SET is_verified = ?, verification_token = ? WHERE id = ?"
+        const keys = Object.keys(fields);
+        const values = Object.values(fields);
+        
+        const setClause = keys.map(key => `${key} = ?`).join(', ');
+        const sql = `UPDATE users SET ${setClause} WHERE id = ?`;
+        
+        await Database.query(sql, [...values, id]);
     }
 
     /**

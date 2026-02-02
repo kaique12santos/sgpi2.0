@@ -125,8 +125,25 @@ Gera e baixa um arquivo ZIP contendo todos os documentos aprovados de uma pasta.
 ### 5. Gestão e Limpeza
 Rotas para manutenção do conteúdo.
 
-#### Deletar Documento
+#### 6. Deletar Documento
 Remove um arquivo do banco e move para a lixeira do Drive.
 - **Rota:** `DELETE /api/management/documents/:id`
 - **Auth:** Necessário Bearer Token.
 - **Retorno (200):** `{ "success": true, "message": "..." }`
+
+### 7. Autenticação
+...
+- **POST /api/auth/register**
+  - Agora envia e-mail com token. Retorna aviso se o e-mail falhar.
+- **POST /api/auth/verify** (NOVO)
+  - **Body:** `{ "email": "...", "code": "123456" }`
+  - **Retorno:** Sucesso ou Erro.
+- **POST /api/auth/login**
+  - **Mudança:** Retorna `403 Forbidden` se a conta não estiver verificada.
+
+### 8. Dados Auxiliares (Metadados)
+Endpoints para popular selects e informações do sistema.
+- **GET /api/metadata/disciplines**
+  - Lista todas disciplinas (ID, Nome).
+- **GET /api/metadata/semester**
+  - Retorna o semestre ativo (ex: 2025_1).

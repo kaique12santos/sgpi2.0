@@ -55,3 +55,11 @@ Serviços que rodam em segundo plano, desacoplados da requisição HTTP.
     - Realiza o upload para o Google Drive.
     - Gerencia retentativas (Retry Logic) em caso de falha de rede.
     - Limpa o disco local após sucesso.
+
+### 9. Automation Services
+Serviços temporizados que rodam independentemente de requisições do usuário.
+- **CleanupService:** Garbage collector do disco local.
+- **SemesterAutomationService:** Gerente do calendário acadêmico (Rotação de pastas 2025_1 -> 2025_2).
+
+### 10. Communication Services
+- **EmailService:** Abstração do `nodemailer`. Responsável pelo envio transacional de códigos de verificação e, futuramente, notificações de prazos.
