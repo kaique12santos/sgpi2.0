@@ -40,6 +40,14 @@ class SubmissionFolderRepository {
         const rows = await Database.query(sql, [id]);
         return rows[0];
     }
+
+    async delete(id) {
+        // Primeiro deleta os documentos filhos (limpeza manual para garantir)
+        await Database.query(`DELETE FROM documents WHERE folder_id = ?`, [id]);
+        // Depois deleta a pasta
+        const sql = `DELETE FROM submission_folders WHERE id = ?`;
+        await Database.query(sql, [id]);
+    }
 }
 
 module.exports = new SubmissionFolderRepository();

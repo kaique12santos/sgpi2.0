@@ -108,3 +108,11 @@
 - **Autonomia:** Reduz a carga sobre o coordenador. O próprio professor pode resetar sua senha.
 - **Segurança:** O token de reset tem validade curta (1 hora) e é invalidado imediatamente após o uso.
 - **Resiliência:** Implementação de endpoint de reenvio de código de verificação para contornar falhas de entrega de e-mail.
+
+## 14. Política de Retenção Legal (Regra dos 5 Anos)
+**Data:** 02/02/2026
+**Decisão:** Bloqueio sistêmico na exclusão de Pastas de Entrega (Submission Folders).
+**Motivação:**
+- **Compliance:** O curso de DSM exige a guarda de documentos por 5 anos.
+- **Segurança:** O sistema impede que um Coordenador apague acidentalmente um semestre recente.
+- **Exceção:** A exclusão é permitida se a pasta tiver menos de 5 anos MAS estiver **vazia** (sem arquivos vinculados), caracterizando um erro de criação ou pasta de teste.

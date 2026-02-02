@@ -156,3 +156,12 @@ Endpoints para popular selects e informações do sistema.
 - **POST /api/auth/reset-password**
   - **Body:** `{ "email": "...", "code": "...", "newPassword": "..." }`
   - Define a nova senha e limpa os tokens de segurança.
+
+  ### Gestão de Pastas
+- **DELETE /api/management/folders/:id**
+  - **Auth:** Exclusivo para Coordenador.
+  - **Lógica:**
+    1. Verifica a data de criação.
+    2. Se idade < 5 anos e contiver arquivos -> Retorna `400 Bad Request` (Bloqueado).
+    3. Se idade >= 5 anos OU estiver vazia -> Remove do Banco e do Drive.
+  - **Retorno:** Sucesso ou Erro com justificativa legal.

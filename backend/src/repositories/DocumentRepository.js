@@ -107,6 +107,12 @@ class DocumentRepository {
         const sql = `DELETE FROM documents WHERE id = ?`;
         await Database.query(sql, [id]);
     }
+
+    async countByFolder(folderId) {
+        const sql = `SELECT COUNT(*) as total FROM documents WHERE folder_id = ?`;
+        const rows = await Database.query(sql, [folderId]);
+        return rows[0].total;
+    }
 }
 
 module.exports = new DocumentRepository();

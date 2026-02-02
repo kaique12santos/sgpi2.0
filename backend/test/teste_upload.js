@@ -6,7 +6,7 @@ const API_URL = 'http://localhost:3000/api';
 // 1. Configuração do Usuário de Teste
 const USER = {
     email: "teste_123@fatec.sp.gov.br", 
-    password: "senha_super_secreta"
+    password: "senha_nova_super_segura_2026"
 };
 
 async function testeUploadCompleto() {
