@@ -71,3 +71,11 @@
 **Motivação:**
 - **Performance:** Baixar todos os arquivos do Drive para o disco do servidor antes de entregar ao usuário causaria latência alta e consumo excessivo de disco/memória.
 - **Solução:** Utilizamos a biblioteca `archiver` conectada via Pipe (`.pipe()`) diretamente à resposta HTTP. O servidor atua apenas como um "tubo", pegando os bytes do Google Drive, compactando e enviando ao navegador simultaneamente.
+
+## 10. Política de Exclusão e Permissões
+**Data:** 01/02/2026
+**Decisão:** Deleção física de arquivos e lógica de permissões rígida.
+**Motivação:**
+- **Permissões:** Apenas o **Coordenador** (Admin) ou o **Dono do Arquivo** (Professor que fez upload) podem deletar um documento. Isso impede sabotagem entre professores.
+- **Drive:** Arquivos deletados via sistema são movidos para a **Lixeira** do Google Drive (`trashed: true`) em vez de excluídos permanentemente, permitindo recuperação manual em caso de acidente (Safety Net).
+- **Local:** Arquivos temporários locais são removidos fisicamente (`fs.unlink`) para não lotar o servidor.

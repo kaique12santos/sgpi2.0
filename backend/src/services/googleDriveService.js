@@ -94,6 +94,23 @@ class DriveService {
     }
 
     /**
+     * Deleta (ou move para a lixeira) um arquivo ou pasta no Google Drive.
+     */
+    async deleteFile(fileId) {
+        try {
+            await this.drive.files.update({
+                fileId: fileId,
+                resource: { trashed: true } // Mover para lixeira é mais seguro que delete permanente
+            });
+            console.log(`🗑️ Arquivo ${fileId} movido para a lixeira do Drive.`);
+        } catch (error) {
+            console.error(`❌ Erro ao deletar arquivo ${fileId}:`, error.message);
+            // Não lançamos erro aqui para permitir que o sistema remova do banco mesmo se falhar no Drive
+            // (Ex: se o arquivo já foi apagado manualmente lá)
+        }
+    }
+
+    /**
      * Obtém o stream de leitura de um arquivo (para download/zip).
      * @param {string} fileId - ID do arquivo no Drive.
      * @returns {Promise<Stream>} Stream do arquivo.

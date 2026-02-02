@@ -121,3 +121,12 @@ Gera e baixa um arquivo ZIP contendo todos os documentos aprovados de uma pasta.
 - **Auth:** Necessário Bearer Token.
 - **Retorno:** Arquivo binário (`application/zip`).
 - **Nome do Arquivo:** `Titulo_do_Pacote.zip`
+
+### 5. Gestão e Limpeza
+Rotas para manutenção do conteúdo.
+
+#### Deletar Documento
+Remove um arquivo do banco e move para a lixeira do Drive.
+- **Rota:** `DELETE /api/management/documents/:id`
+- **Auth:** Necessário Bearer Token.
+- **Retorno (200):** `{ "success": true, "message": "..." }`

@@ -32,6 +32,9 @@ class SubmissionFolderRepository {
         return await Database.query(sql, [userId]);
     }
 
+    /**
+     * Busca pasta pelo ID (com info do dono).
+     */
     async findById(id) {
         const sql = `SELECT * FROM submission_folders WHERE id = ?`;
         const rows = await Database.query(sql, [id]);

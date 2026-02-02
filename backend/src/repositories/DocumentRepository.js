@@ -64,6 +64,23 @@ class DocumentRepository {
     }
 
     /**
+     * Salva um Link externo (YouTube, Github, etc) como se fosse um documento.
+     * Status já nasce COMPLETED.
+     */
+    async createLink({ folder_id, title, url }) {
+        const sql = `
+            INSERT INTO documents 
+            (folder_id, original_name, drive_web_link, mime_type, status, drive_file_id, size_bytes)
+            VALUES (?, ?, ?, 'application/internet-shortcut', 'COMPLETED', 'LINK_EXTERNO', 0)
+        `;
+        // drive_file_id = 'LINK_EXTERNO' serve de flag para o DownloadController não buscar no Drive
+        const result = await Database.query(sql, [
+            folder_id, title, url
+        ]);
+        return result.insertId;
+    }
+
+    /**
      * Busca todos os documentos finalizados de uma pasta específica.
      */
     async findAllByFolder(folderId) {
@@ -72,6 +89,23 @@ class DocumentRepository {
             WHERE folder_id = ? AND status = 'COMPLETED'
         `;
         return await Database.query(sql, [folderId]);
+    }
+
+    /**
+     * Busca documento pelo ID (para verificação de dono).
+     */
+    async findById(id) {
+        const sql = `SELECT * FROM documents WHERE id = ?`;
+        const rows = await Database.query(sql, [id]);
+        return rows[0];
+    }
+
+    /**
+     * Remove o registro do documento do banco de dados.
+     */
+    async delete(id) {
+        const sql = `DELETE FROM documents WHERE id = ?`;
+        await Database.query(sql, [id]);
     }
 }
 
