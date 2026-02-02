@@ -13,6 +13,7 @@ try {
 } catch (e) {
     console.warn('⚠️ cleanupService ainda não está na pasta src/services. Agendamento ignorado.');
 }
+const semestreAutomationService = require('./src/services/SemesterAutomationService.js');
 
 require('dotenv').config();
 
@@ -29,6 +30,8 @@ if (cleanupService && typeof cleanupService.iniciarAgendamento === 'function') {
 // Verifica se ficaram uploads pendentes quando o servidor reiniciou
 UploadQueueWorker.processQueue();
 
+//verifica e cria semestres automaticamente
+semestreAutomationService.init();
 
 /**
  * Inicialização do Servidor HTTP.
