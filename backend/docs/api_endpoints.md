@@ -147,3 +147,12 @@ Endpoints para popular selects e informações do sistema.
   - Lista todas disciplinas (ID, Nome).
 - **GET /api/metadata/semester**
   - Retorna o semestre ativo (ex: 2025_1).
+
+### Recuperação e Segurança
+- **POST /api/auth/resend-verification**
+  - Reenvia o código de 6 dígitos para o e-mail cadastrado.
+- **POST /api/auth/forgot-password**
+  - Gera um token de reset e envia por e-mail (Validade: 1h).
+- **POST /api/auth/reset-password**
+  - **Body:** `{ "email": "...", "code": "...", "newPassword": "..." }`
+  - Define a nova senha e limpa os tokens de segurança.

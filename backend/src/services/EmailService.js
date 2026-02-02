@@ -7,11 +7,17 @@ class EmailService {
         this.transporter = nodemailer.createTransport({
             host: process.env.EMAIL_HOST,
             port: process.env.EMAIL_PORT,
-            secure: true, // true para 465, false para outras portas
+            secure: false, // true para 465, false para outras portas
             auth: {
                 user: process.env.EMAIL_FROM,
                 pass: process.env.EMAIL_PASSWORD,
             },
+            tls:{
+                rejectUnauthorized: false,
+                ciphers:'SSLv3'
+            },
+            connectionTimeout: 5000, // 5 segundos
+            greetingTimeout: 5000  
         });
     }
 
@@ -34,6 +40,30 @@ class EmailService {
             return true;
         } catch (error) {
             console.error('❌ Erro ao enviar e-mail:', error);
+            return false;
+        }
+    }
+
+    async sendPasswordReset(toEmail, code) {
+        try {
+            const info = await this.transporter.sendMail({
+                from: `"SGPI Fatec" <${process.env.MAIL_USER}>`,
+                to: toEmail,
+                subject: "Recuperação de Senha - SGPI",
+                html: `
+                    <div style="font-family: Arial, sans-serif; padding: 20px;">
+                        <h2>Esqueceu sua senha?</h2>
+                        <p>Sem problemas. Use o código abaixo para redefinir:</p>
+                        <h1 style="color: #c0392b; letter-spacing: 5px;">${code}</h1>
+                        <p>Este código expira em 1 hora.</p>
+                        <p>Se você não pediu isso, troque sua senha imediatamente.</p>
+                    </div>
+                `,
+            });
+            console.log(`📧 E-mail de Reset enviado para ${toEmail}`);
+            return true;
+        } catch (error) {
+            console.error('❌ Erro ao enviar e-mail de reset:', error);
             return false;
         }
     }

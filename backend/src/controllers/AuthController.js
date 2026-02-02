@@ -140,6 +140,96 @@ class AuthController {
             return res.status(500).json({ error: 'Erro ao verificar e-mail.' });
         }
     }
+
+    // REENVIAR CÓDIGO DE VERIFICAÇÃO (Item 2)
+    async resendVerification(req, res) {
+        const { email } = req.body;
+        try {
+            const user = await UserRepository.findByEmail(email);
+            if (!user) return res.status(404).json({ error: 'Usuário não encontrado.' });
+            if (user.is_verified) return res.status(400).json({ error: 'Esta conta já está verificada.' });
+
+            // Gera novo código
+            const newToken = Math.floor(100000 + Math.random() * 900000).toString();
+            
+            // Atualiza no banco
+            await UserRepository.update(user.id, { verification_token: newToken });
+
+            // Envia e-mail
+            await EmailService.sendVerificationCode(email, newToken);
+
+            return res.json({ success: true, message: 'Novo código de verificação enviado.' });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Erro ao reenviar código.' });
+        }
+    }
+
+    // ESQUECI A SENHA (Item 3 - Parte A)
+    async forgotPassword(req, res) {
+        const { email } = req.body;
+        try {
+            const user = await UserRepository.findByEmail(email);
+            if (!user) return res.status(404).json({ error: 'Usuário não encontrado.' });
+
+            // Gera token de reset
+            const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
+            
+            // Define validade (Agora + 1 hora)
+            // MySQL espera formato 'YYYY-MM-DD HH:MM:SS' ou objeto Date do JS
+            const expires = new Date(Date.now() + 3600000); // 1 hora em milissegundos
+
+            await UserRepository.update(user.id, { 
+                reset_token: resetToken,
+                reset_expires: expires 
+            });
+
+            await EmailService.sendPasswordReset(email, resetToken);
+
+            return res.json({ success: true, message: 'Código de recuperação enviado para seu e-mail.' });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Erro ao processar recuperação de senha.' });
+        }
+    }
+
+    // RESETAR SENHA (Item 3 - Parte B)
+    async resetPassword(req, res) {
+        const { email, code, newPassword } = req.body;
+        try {
+            const user = await UserRepository.findByEmail(email);
+            if (!user) return res.status(404).json({ error: 'Usuário não encontrado.' });
+
+            // Validações
+            if (user.reset_token !== code) {
+                return res.status(400).json({ error: 'Código inválido.' });
+            }
+
+            const now = new Date();
+            // Verifica se o token expirou (Comparação de datas)
+            if (now > new Date(user.reset_expires)) {
+                return res.status(400).json({ error: 'Código expirado. Solicite novamente.' });
+            }
+
+            // Tudo certo: Atualiza senha e limpa tokens
+            // OBS: UserRepository.update não faz hash automático (o create faz).
+            // Precisamos hashear a senha aqui ou atualizar o repository. 
+            // Vamos hashear aqui para ser rápido:
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+            await UserRepository.update(user.id, {
+                password_hash: hashedPassword,
+                reset_token: null,
+                reset_expires: null
+            });
+
+            return res.json({ success: true, message: 'Senha alterada com sucesso! Faça login.' });
+
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Erro ao resetar senha.' });
+        }
+    }
 }
 
 module.exports = new AuthController();

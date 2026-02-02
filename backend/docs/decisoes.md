@@ -100,3 +100,11 @@
 **Decisão:** Criação de endpoints públicos (para usuários logados) de listas auxiliares.
 **Motivação:**
 - **Frontend Driven:** O Frontend não deve ter IDs "hardcoded". Ele deve consultar a API para saber quais disciplinas (`/metadata/disciplines`) e qual semestre (`/metadata/semester`) estão disponíveis, garantindo dinamismo se o banco mudar.
+
+## 13. Recuperação de Acesso (Self-Service)
+**Data:** 02/02/2026
+**Decisão:** Implementação de fluxo de "Esqueci minha senha" via Token de E-mail.
+**Motivação:**
+- **Autonomia:** Reduz a carga sobre o coordenador. O próprio professor pode resetar sua senha.
+- **Segurança:** O token de reset tem validade curta (1 hora) e é invalidado imediatamente após o uso.
+- **Resiliência:** Implementação de endpoint de reenvio de código de verificação para contornar falhas de entrega de e-mail.
