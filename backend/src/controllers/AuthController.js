@@ -38,7 +38,7 @@ class AuthController {
             // 3. Verifica senha (Bcrypt)
             const senhaBate = await bcrypt.compare(password, user.password_hash);
             if (!senhaBate) {
-                return res.status(401).json({ error: 'Credenciais inválidas.' });
+                return res.status(401).json({ error: 'Senha Incorreta' });
             }
 
             // 4. Gera o Token JWT
@@ -74,49 +74,90 @@ class AuthController {
 
         try {
             const userExists = await UserRepository.findByEmail(email);
+
+            // Criptografa a senha nova
+            const passwordHash = await bcrypt.hash(password, 8);
+            // Gera novo token
+            const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+            const tokenExpiration = new Date(Date.now() + 3600000); // 1 hora
+
             if (userExists) {
-                return res.status(400).json({ error: 'Email já cadastrado.' });
-            }
+                // CENÁRIO 1: Conta Real (Já validada) -> Bloqueia
+                if (userExists.is_verified) {
+                    return res.status(400).json({ error: 'Este e-mail já está cadastrado e ativo.' });
+                }
 
-            // Gera código de 6 dígitos
-            const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
+                // CENÁRIO 2: Conta Fantasma (Nunca validou) -> Recicla/Sobrescreve
+                // Isso resolve o problema de "ficar preso" no cadastro
+                await UserRepository.update(userExists.id, {
+                    name: name,
+                    password: passwordHash, // Atualiza para a senha nova que ele acabou de digitar
+                    verification_token: verificationCode,
+                    reset_expires: tokenExpiration,
+                    role: role || 'professor'
+                });
 
-            const newUser = { 
-                name, 
-                email, 
-                password, 
-                role: role || 'professor',
-                is_verified: 0, // Nasce bloqueado
-                verification_token: verificationToken
-            };
+                await EmailService.sendVerificationCode(email, verificationCode);
 
-            const userId = await UserRepository.create(newUser);
-
-            // Tenta enviar o e-mail
-            const emailSent = await EmailService.sendVerificationCode(email, verificationToken);
-
-            if (!emailSent) {
-                // Se o e-mail falhar, deletamos o usuário para ele tentar de novo?
-                // Ou avisamos para ele pedir reenvio. Vamos avisar.
-                return res.status(201).json({
-                    success: true,
-                    userId,
-                    warning: 'Usuário criado, mas falha ao enviar e-mail. Peça o reenvio.'
+                return res.status(200).json({ 
+                    message: 'Cadastro pendente atualizado. Novo código enviado.',
+                    email: email 
                 });
             }
 
-            return res.status(201).json({ 
-                success: true, 
-                userId,
-                message: 'Cadastro realizado! Verifique seu e-mail para ativar a conta.'
+            // CENÁRIO 3: Usuário Novo -> Cria
+            await UserRepository.create({
+                name,
+                email,
+                password: passwordHash,
+                role: role || 'professor',
+                is_verified: false, // Entra como 0 (Pendente)
+                verification_token: verificationCode,
+                reset_expires: tokenExpiration
             });
 
+            await EmailService.sendVerificationCode(email, verificationCode);
+
+            return res.status(201).json({ message: 'Usuário criado. Verifique seu email.' });
+
         } catch (error) {
-            console.error(error);
-            return res.status(500).json({ error: 'Erro ao registrar usuário.' });
+            console.error('Erro no registro:', error);
+            return res.status(500).json({ error: 'Erro interno no servidor.' });
         }
     }
 
+    // REENVIAR CÓDIGO DE VERIFICAÇÃO (Item 2)
+    async resendVerification(req, res) {
+        const { email } = req.body;
+
+        try {
+            const user = await UserRepository.findByEmail(email);
+
+            if (!user) {
+                return res.status(404).json({ error: 'Usuário não encontrado.' });
+            }
+            if (user.is_verified) {
+                return res.status(400).json({ error: 'Esta conta já está verificada. Faça login.' });
+            }
+
+            // Gera novo token
+            const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+            const tokenExpiration = new Date(Date.now() + 3600000);
+
+            await UserRepository.update(user.id, {
+                verification_token: verificationCode,
+                reset_expires: tokenExpiration
+            });
+
+            await EmailService.sendVerificationCode(email, verificationCode);
+
+            return res.json({ message: 'Novo código enviado.' });
+
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Erro ao reenviar código.' });
+        }
+    }
     async verifyEmail(req, res) {
         const { email, code } = req.body;
 

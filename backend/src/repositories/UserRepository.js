@@ -17,19 +17,24 @@ class UserRepository {
      */
     async create(user) {
         const hashedPassword = await bcrypt.hash(user.password, 10);
-        const sql = `INSERT INTO users (name, email, password_hash, role, is_verified, verification_token) VALUES (?, ?, ?, ?, ?, ?)`;
+        const sql = `INSERT INTO users (name, email, password_hash, role, is_verified, verification_token, reset_expires) VALUES (?, ?, ?, ?, ?, ?, ?)`;
         // Adicione os novos campos no array de valores
-        const result = await Database.query(sql, [user.name, user.email, hashedPassword, user.role, user.is_verified, user.verification_token]);
+        const result = await Database.query(sql, [user.name, user.email, hashedPassword, user.role, user.is_verified, user.verification_token, user.reset_expires]);
         return result.insertId;
     }
 
-    // Adicione o método update:
+    // Atualiza campos específicos do usuário.
     async update(id, fields) {
-        // Gera query dinâmica: "UPDATE users SET is_verified = ?, verification_token = ? WHERE id = ?"
         const keys = Object.keys(fields);
         const values = Object.values(fields);
         
-        const setClause = keys.map(key => `${key} = ?`).join(', ');
+        if (keys.length === 0) return;
+
+        // Cria a query: UPDATE users SET password = ?, verification_token = ? WHERE id = ?
+        const setClause = keys.map(key => {
+            if (key === 'password') return `password_hash = ?`; // <--- TRADUÇÃO
+            return `${key} = ?`;
+        }).join(', ');
         const sql = `UPDATE users SET ${setClause} WHERE id = ?`;
         
         await Database.query(sql, [...values, id]);
@@ -45,7 +50,7 @@ class UserRepository {
         const sql = `SELECT * FROM users WHERE email = ? LIMIT 1`;
         const rows = await Database.query(sql, [email]);
         
-        return rows.length > 0 ? rows[0] : null;
+        return rows[0];
     }
 
     /**
