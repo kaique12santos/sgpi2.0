@@ -116,3 +116,15 @@
 - **Compliance:** O curso de DSM exige a guarda de documentos por 5 anos.
 - **Segurança:** O sistema impede que um Coordenador apague acidentalmente um semestre recente.
 - **Exceção:** A exclusão é permitida se a pasta tiver menos de 5 anos MAS estiver **vazia** (sem arquivos vinculados), caracterizando um erro de criação ou pasta de teste.
+
+## 15. Fluxo de Cadastro e Reciclagem de Contas
+**Data:** 02/02/2026
+**Decisão:** Implementação de lógica de "Upsert" (Atualização) para cadastros não verificados.
+**Contexto:**
+- Usuários podiam ficar "presos" se o cadastro inicial falhasse antes da validação do token (erro de duplicidade de e-mail).
+**Solução Técnica:**
+- Se um e-mail já existe no banco mas `is_verified = 0`:
+    1. O sistema não retorna erro.
+    2. Atualiza a senha (hash) e gera um novo token.
+    3. Reenvia o e-mail.
+- **Padronização de Senha:** A criptografia (`bcrypt`) foi movida exclusivamente para o *Controller*. O *Repository* apenas persiste o dado na coluna `password_hash`.

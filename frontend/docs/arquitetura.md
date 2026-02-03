@@ -23,3 +23,12 @@ O tema foi configurado em `src/theme/index.js` para espelhar a identidade visual
 - `src/layout/`: Estruturas de página (Sidebar, Header).
 - `src/pages/`: Telas da aplicação.
 - `src/theme/`: Configurações de design system.
+
+## 4. Evolução da Identidade Visual (V1)
+**Data:** 02/02/2026
+**Estilo:** "Institucional Clean"
+- **Login:** Adotado o padrão de "Card Bicolor" (Cabeçalho Vermelho `#970000` com logo SGPI + Corpo Branco).
+- **Layout Principal:**
+  - **Header:** Barra sólida vinho (`#970000`) contendo logos institucionais (CPS à esquerda, Fatec à direita).
+  - **Sidebar:** Menu vertical claro com indicação de ativo via borda esquerda vermelha (Padrão Dashboard Aluno).
+- **Fluxo de Cadastro:** Implementado em etapas (Stepper) para separar dados pessoais da validação de token.
