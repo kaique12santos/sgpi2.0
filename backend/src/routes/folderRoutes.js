@@ -10,4 +10,5 @@ router.use(authMiddleware);
 router.post('/create', FolderController.create);
 router.get('/my-folders', FolderController.listMyFolders);
 
+
 module.exports = router;

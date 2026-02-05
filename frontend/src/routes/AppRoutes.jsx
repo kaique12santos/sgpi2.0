@@ -9,7 +9,7 @@ import Dashboard from '../pages/Dashboard';
 import Register from '../pages/Auth/Register';
 import ForgotPassword from '../pages/Auth/ForgotPassword';
 import Profile from '../pages/Profile';
-
+import UploadPage from '../pages/Professor/UploadPage';
 
 // Componente para proteger rotas privadas
 const Private = ({ children }) => {
@@ -42,6 +42,7 @@ export default function AppRoutes() {
                 <Route index element={<Dashboard />} />
                 {/* Futuras rotas virão aqui: */}
                 <Route path="perfil" element={<Profile />} />
+                <Route path="novo-envio" element={<UploadPage />} />
             </Route>
 
             {/* Qualquer rota desconhecida joga pro Login */}

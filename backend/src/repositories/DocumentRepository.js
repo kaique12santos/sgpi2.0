@@ -2,23 +2,42 @@ const Database = require('../config/Database');
 
 class DocumentRepository {
     
-    // Cria o registro inicial (Estado PENDING)
+    // --- MÉTODO CORRIGIDO (SEM TITLE, MAS COM A CONVERSÃO DE ID) ---
     async create({ folder_id, original_name, local_path, mime_type, size_bytes }) {
+        
+        // 1. A query não tem mais o campo 'title'
+        // 2. Mantivemos a SUBQUERY para converter o ID do Drive (String) no ID da Pasta (Int)
         const sql = `
             INSERT INTO documents 
-            (folder_id, original_name, local_path, mime_type, size_bytes, status, drive_file_id)
-            VALUES (?, ?, ?, ?, ?, 'PENDING', 'temp_pending')
+            (
+                folder_id, 
+                original_name, 
+                local_path, 
+                mime_type, 
+                size_bytes, 
+                status, 
+                drive_file_id
+            )
+            VALUES (
+                (SELECT id FROM submission_folders WHERE drive_folder_id = ? LIMIT 1), 
+                ?, ?, ?, ?, 'PENDING', 'temp_pending'
+            )
         `;
-        // drive_file_id é obrigatório no banco, colocamos um temporário até subir
+        
         const result = await Database.query(sql, [
-            folder_id, original_name, local_path, mime_type, size_bytes
+            folder_id,      // O ID do Drive que vem do Front (vai para a subquery)
+            original_name,  // Nome do arquivo (ex: projeto.pdf)
+            local_path, 
+            mime_type, 
+            size_bytes
         ]);
+
         return result.insertId;
     }
 
-    // Busca o próximo arquivo da fila que precisa ser processado
+    // --- MÉTODOS DA FILA (MANTIDOS) ---
+
     async findNextPending() {
-        // Pega um arquivo PENDENTE ou com ERRO (se tentou menos de 3 vezes)
         const sql = `
             SELECT * FROM documents 
             WHERE status = 'PENDING' 
@@ -30,19 +49,15 @@ class DocumentRepository {
         return rows[0];
     }
 
-    // Atualiza o status (Ex: de PENDING para COMPLETED)
-   // Atualiza o status (Ex: de PENDING para COMPLETED)
     async updateStatus(id, status, driveData = {}) {
         let sql = `UPDATE documents SET status = ?`;
         const params = [status];
 
         // Se tiver ID do Drive, atualiza os campos
-        // Verificação reforçada: checa se driveData e driveData.id existem
         if (driveData && (driveData.id || driveData.drive_file_id)) {
-            // O Google retorna 'id', mas nossa tabela usa 'drive_file_id'
-            // Vamos garantir que pegamos o ID certo independente de como venha
             const realDriveId = driveData.id || driveData.drive_file_id;
             
+            // Note que aqui usamos os nomes exatos do seu CREATE TABLE
             sql += `, drive_file_id = ?, drive_web_link = ?, drive_download_link = ?`;
             params.push(realDriveId, driveData.webViewLink, driveData.webContentLink);
         }
@@ -52,7 +67,6 @@ class DocumentRepository {
             params.push(driveData.error);
         }
 
-        // Se completou, limpamos o caminho local
         if (status === 'COMPLETED') {
             sql += `, local_path = NULL`;
         }
@@ -63,55 +77,36 @@ class DocumentRepository {
         await Database.query(sql, params);
     }
 
-    /**
-     * Salva um Link externo (YouTube, Github, etc) como se fosse um documento.
-     * Status já nasce COMPLETED.
-     */
-    async createLink({ folder_id, title, url }) {
+    // Criação de Link Externo (Sem title também, para não quebrar)
+    async createLink({ folder_id, url, original_name }) { // Trocamos title por original_name
         const sql = `
             INSERT INTO documents 
             (folder_id, original_name, drive_web_link, mime_type, status, drive_file_id, size_bytes)
-            VALUES (?, ?, ?, 'application/internet-shortcut', 'COMPLETED', 'LINK_EXTERNO', 0)
+            VALUES (
+                (SELECT id FROM submission_folders WHERE drive_folder_id = ? LIMIT 1), 
+                ?, ?, 'application/internet-shortcut', 'COMPLETED', 'LINK_EXTERNO', 0
+            )
         `;
-        // drive_file_id = 'LINK_EXTERNO' serve de flag para o DownloadController não buscar no Drive
         const result = await Database.query(sql, [
-            folder_id, title, url
+            folder_id, original_name || 'Link Externo', url
         ]);
         return result.insertId;
     }
 
-    /**
-     * Busca todos os documentos finalizados de uma pasta específica.
-     */
     async findAllByFolder(folderId) {
-        const sql = `
-            SELECT * FROM documents 
-            WHERE folder_id = ? AND status = 'COMPLETED'
-        `;
+        const sql = `SELECT * FROM documents WHERE folder_id = ? AND status = 'COMPLETED'`;
         return await Database.query(sql, [folderId]);
     }
 
-    /**
-     * Busca documento pelo ID (para verificação de dono).
-     */
     async findById(id) {
         const sql = `SELECT * FROM documents WHERE id = ?`;
         const rows = await Database.query(sql, [id]);
         return rows[0];
     }
 
-    /**
-     * Remove o registro do documento do banco de dados.
-     */
     async delete(id) {
         const sql = `DELETE FROM documents WHERE id = ?`;
         await Database.query(sql, [id]);
-    }
-
-    async countByFolder(folderId) {
-        const sql = `SELECT COUNT(*) as total FROM documents WHERE folder_id = ?`;
-        const rows = await Database.query(sql, [folderId]);
-        return rows[0].total;
     }
 }
 

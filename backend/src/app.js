@@ -10,7 +10,8 @@ const downloadRoutes = require('./routes/downloadRoutes');
 const linkRoutes = require('./routes/linkRoutes');
 const managementRoutes = require('./routes/managementRoutes');
 const metadataRoutes = require('./routes/metadataRoutes');
-
+const setupRoutes = require('./routes/setupRoutes');
+const submissionRoutes = require('./routes/submissionRoutes');
 
 // Importação das Rotas (Futuro)
 // const authRoutes = require('./routes/authRoutes');
@@ -64,6 +65,8 @@ class App {
         this.app.use('/api/links', linkRoutes);
         this.app.use('/api/management', managementRoutes);
         this.app.use('/api/metadata', metadataRoutes);
+        this.app.use('/api/setup', setupRoutes);
+        this.app.use('/api/submission-folders', submissionRoutes);
 
 
     }
