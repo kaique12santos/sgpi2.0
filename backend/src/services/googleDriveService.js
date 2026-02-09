@@ -127,6 +127,24 @@ class DriveService {
             throw error;
         }
     }
+
+    /**
+     * Renomeia um arquivo ou pasta no Drive.
+     * @param {string} fileId - ID do arquivo/pasta no Drive.
+     * @param {string} newName - Novo nome.
+     */
+    async renameFile(fileId, newName) {
+        try {
+            await this.drive.files.update({
+                fileId: fileId,
+                resource: { name: newName }
+            });
+            console.log(`✏️ Arquivo ${fileId} renomeado para "${newName}"`);
+        } catch (error) {
+            console.error(`❌ Erro ao renomear arquivo ${fileId}:`, error.message);
+            throw error;
+        }
+    }
 }
 
 // Exporta uma instância única (Singleton) já inicializada

@@ -87,6 +87,88 @@ class FolderController {
             res.status(500).json({ error: 'Erro ao listar pastas.' });
         }
     }
+
+    /**
+     * Lista todas as pastas do sistema (Apenas Coordenador).
+     */
+    async listAll(req, res) {
+        try {
+            // Opcional: Se seu middleware de auth não bloquear roles, bloqueie aqui
+            if (req.userRole !== 'coordenador') return res.status(403).json({ error: 'Acesso negado. Somente coordenadores podem acessar todas as pastas.' });
+
+            const folders = await SubmissionFolderRepository.findAllWithDetails();
+            res.json({ success: true, folders });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Erro ao listar todas as pastas.' });
+        }
+    }
+
+    /**
+     * UPDATE: Renomear pasta
+     * Regra: Exclusivo do Professor DONO da pasta.
+     */
+    async update(req, res) {
+        try {
+            const { id } = req.params; // ID do banco (não do Drive)
+            const { title } = req.body;
+            const userId = req.userId; // ID do professor logado
+
+            // 1. Busca a pasta no banco para ver quem é o dono
+            const folder = await SubmissionFolderRepository.findById(id);
+            if (!folder) return res.status(404).json({ error: 'Pasta não encontrada.' });
+
+            // 2. AQUI ESTÁ A REGRA DE EXCLUSIVIDADE 🔒
+            // Se o ID do usuário logado for diferente do dono da pasta...
+            if (folder.user_id !== userId) {
+                return res.status(403).json({ error: 'Acesso negado: Você só pode editar suas próprias pastas.' });
+            }
+
+            // 3. Se passou, chama o serviço genérico para atualizar no Drive
+            await DriveService.renameFile(folder.drive_folder_id, title);
+
+            // 4. Atualiza no Banco
+            await SubmissionFolderRepository.updateTitle(id, title);
+
+            return res.json({ success: true, message: 'Pasta renomeada com sucesso.' });
+
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Erro ao atualizar pasta.' });
+        }
+    }
+
+    /**
+     * DELETE: Apagar pasta
+     * Regra: Exclusivo do Professor DONO da pasta.
+     */
+    async delete(req, res) {
+        try {
+            const { id } = req.params;
+            const userId = req.userId;
+
+            // 1. Busca pasta
+            const folder = await SubmissionFolderRepository.findById(id);
+            if (!folder) return res.status(404).json({ error: 'Pasta não encontrada.' });
+
+            // 2. REGRA DE EXCLUSIVIDADE 🔒
+            if (folder.user_id !== userId) {
+                return res.status(403).json({ error: 'Acesso negado: Você só pode excluir suas próprias pastas.' });
+            }
+
+            // 3. Move para a lixeira no Drive (Usando seu método genérico)
+            await DriveService.deleteFile(folder.drive_folder_id);
+
+            // 4. Remove do Banco (Cascade remove os documentos)
+            await SubmissionFolderRepository.delete(id);
+
+            return res.json({ success: true, message: 'Pacote removido com sucesso.' });
+
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Erro ao excluir pasta.' });
+        }
+    }
 }
 
 module.exports = new FolderController();

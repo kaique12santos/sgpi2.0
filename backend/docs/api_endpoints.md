@@ -165,3 +165,14 @@ Endpoints para popular selects e informações do sistema.
     2. Se idade < 5 anos e contiver arquivos -> Retorna `400 Bad Request` (Bloqueado).
     3. Se idade >= 5 anos OU estiver vazia -> Remove do Banco e do Drive.
   - **Retorno:** Sucesso ou Erro com justificativa legal.
+
+### 3. Editar Pacote
+Renomeia a pasta no sistema e no Google Drive.
+- **Rota:** `PUT /api/folders/:id`
+- **Body:** `{ "title": "Novo Nome" }`
+- **Retorno:** `{ "success": true }`
+
+### 4. Excluir Pacote
+Remove a pasta e todos os seus documentos (Cascade). No Drive, move para a lixeira.
+- **Rota:** `DELETE /api/folders/:id`
+- **Retorno:** `{ "success": true }`
