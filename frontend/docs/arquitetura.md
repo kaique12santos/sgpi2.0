@@ -32,3 +32,26 @@ O tema foi configurado em `src/theme/index.js` para espelhar a identidade visual
   - **Header:** Barra sólida vinho (`#970000`) contendo logos institucionais (CPS à esquerda, Fatec à direita).
   - **Sidebar:** Menu vertical claro com indicação de ativo via borda esquerda vermelha (Padrão Dashboard Aluno).
 - **Fluxo de Cadastro:** Implementado em etapas (Stepper) para separar dados pessoais da validação de token.
+
+**Data:** 09/02/2026
+
+### 5. Acessibilidade (A11y) no Select de Disciplinas
+- **Problema:** Usuários com idade variada (25 a 68 anos) tinham dificuldade de identificar o semestre correto apenas pelo texto.
+- **Solução:** Implementação de "Avatar Numérico" com cores semânticas de alto contraste (Badge Sólida).
+  - *Cores:* Azul (Início) -> Laranja/Vermelho (Final do curso).
+  - *Benefício:* Identificação cognitiva rápida por cor e número grande.
+
+### 6. Prevenção de Erros (Poka-Yoke)
+- **Modal de Cerimônia:** O botão "Enviar" não faz o upload direto. Ele abre um modal de confirmação que exibe:
+  - Nome da Disciplina (com a cor correspondente).
+  - Quantidade de arquivos.
+  - Título da pasta.
+  - *Objetivo:* Forçar uma pausa de leitura para evitar envios na disciplina errada.
+
+### 7. Tratamento de Links Externos
+- **Problema:** O Backend processa filas de arquivos físicos. Links de YouTube/GitHub quebravam esse padrão.
+- **Solução (`addLinkAsFile`):** O Frontend intercepta o link e gera um arquivo `.html` em memória (Blob) contendo um redirecionamento automático.
+  - O Backend recebe como se fosse um arquivo comum, mantendo a arquitetura de "Pacote" inalterada.
+
+### 8. Dropzone Permissiva
+- Expandido `accept` para incluir PPTX, Vídeos (MP4/WebM) e variações de ZIP/RAR, cobrindo todos os cenários de entrega docente.

@@ -128,3 +128,16 @@
     2. Atualiza a senha (hash) e gera um novo token.
     3. Reenvia o e-mail.
 - **Padronização de Senha:** A criptografia (`bcrypt`) foi movida exclusivamente para o *Controller*. O *Repository* apenas persiste o dado na coluna `password_hash`.
+
+
+**Data:** 09/02/2026
+### Novas Funcionalidades (Gestão de Pastas)
+- **GET /api/folders/my-folders**: Lista apenas as pastas criadas pelo professor logado (com contagem de arquivos).
+- **PUT /api/folders/:id**: Permite renomear o título da entrega (Sincroniza Banco + Google Drive).
+- **DELETE /api/folders/:id**: Exclusão lógica e física. Remove do banco e move a pasta do Drive para a Lixeira.
+  - *Regra de Negócio:* Apenas o dono da pasta pode editar/excluir.
+
+### Ajustes de Arquitetura
+- **Listagem de Disciplinas (`/api/metadata/disciplines`)**: 
+  - Alterado para listar a tabela `disciplines` completa em vez de `submission_folders`.
+  - Motivo: Permitir que o professor selecione matérias mesmo que ainda não existam pastas criadas para elas no semestre atual (Lógica *Lazy Creation*).

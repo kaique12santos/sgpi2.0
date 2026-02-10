@@ -176,3 +176,4 @@ Renomeia a pasta no sistema e no Google Drive.
 Remove a pasta e todos os seus documentos (Cascade). No Drive, move para a lixeira.
 - **Rota:** `DELETE /api/folders/:id`
 - **Retorno:** `{ "success": true }`
+

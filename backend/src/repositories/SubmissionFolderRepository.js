@@ -42,6 +42,7 @@ class SubmissionFolderRepository {
             FROM submission_folders sf
             LEFT JOIN disciplines d ON sf.discipline_id = d.id
             LEFT JOIN semesters s ON sf.semester_id = s.id
+            
             ORDER BY sf.created_at DESC
         `;
         return await Database.query(sql);

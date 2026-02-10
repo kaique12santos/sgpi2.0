@@ -25,6 +25,15 @@ class MetadataRepository {
         const rows = await Database.query(sql, [id]);
         return rows[0];
     }
+
+    /**
+     * Lista todas as disciplinas, ordenadas por nome.
+     * Se sua tabela tiver uma coluna 'default_semester' ou 'stage', traga também para usarmos nas cores!
+     */
+    async findAllDisciplines() {
+        const sql = `SELECT * FROM disciplines ORDER BY name ASC`;
+        return await Database.query(sql);
+    }
 }
 
 module.exports = new MetadataRepository();

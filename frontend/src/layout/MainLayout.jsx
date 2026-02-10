@@ -8,18 +8,20 @@ import {
     Image, 
     Text, 
     Menu, 
-    rem, 
     UnstyledButton 
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { 
     IconLogout, 
     IconSettings, 
     IconUpload, 
     IconFiles, 
     IconDashboard, 
-    IconChevronDown 
+    IconChevronDown,
+    IconFolder,
+    IconFileText,
+    IconAlertTriangle
 } from '@tabler/icons-react';
 import { AuthContext } from '../context/AuthContext';
 
@@ -38,11 +40,13 @@ export default function MainLayout() {
     const menuItems = user?.role === 'coordenador' 
         ? [
             { label: 'Painel Geral', icon: IconDashboard, path: '/dashboard' },
-            { label: 'Gerenciar Entregas', icon: IconFiles, path: '/dashboard/entregas' },
+            // Aqui troquei IconFiles por IconFolder (exemplo)
+            { label: 'Gerenciar Entregas', icon: IconFolder, path: '/dashboard/entregas' }, 
             { label: 'Meu Perfil', icon: IconSettings, path: '/dashboard/perfil' },
           ]
         : [
-            { label: 'Meus Envios', icon: IconFiles, path: '/dashboard' },
+            // Aqui troquei IconFiles por IconFileText (exemplo)
+            { label: 'Meus Envios', icon: IconFileText, path: '/dashboard/meus-envios' },
             { label: 'Novo Envio', icon: IconUpload, path: '/dashboard/novo-envio' },
             { label: 'Meu Perfil', icon: IconSettings, path: '/dashboard/perfil' },
           ];
