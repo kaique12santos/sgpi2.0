@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { sanitizeFilename } = require('../utils/stringUtils');
 
 // Garante que a pasta temporária existe
 const uploadDir = path.join(__dirname, '../../uploads');
@@ -15,8 +16,9 @@ const storage = multer.diskStorage({
     filename: (req, file, cb) => {
         // Cria um nome único: TIMESTAMP_NomeOriginal
         // Ex: 1738450000_TrabalhoFinal.pdf
+        const cleanName = sanitizeFilename(file.originalname);
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + '-' + file.originalname);
+        cb(null, uniqueSuffix + '-' + cleanName);
     }
 });
 

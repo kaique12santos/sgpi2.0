@@ -63,3 +63,18 @@ Serviços temporizados que rodam independentemente de requisições do usuário.
 
 ### 10. Communication Services
 - **EmailService:** Abstração do `nodemailer`. Responsável pelo envio transacional de códigos de verificação e, futuramente, notificações de prazos.
+
+
+### 11. Fluxo de Processamento Assíncrono (UploadQueueWorker)
+## [2026-02-10]
+
+O sistema utiliza um padrão de Fila para uploads pesados e geração de links, evitando travar a requisição do usuário.
+
+**Fluxo de Execução:**
+1. **Entrada:** O Controller (`create` ou `addFiles`) salva o registro do arquivo no MySQL com status `PENDING` e o arquivo físico em `/uploads`.
+2. **Processamento:** O `UploadQueueWorker` monitora a fila.
+3. **Upload Drive:** Envia o arquivo para a pasta correta no Google Drive.
+   - *Correção ZIP:* Se a API do Drive não retornar links de visualização para ZIPs, o Worker gera os links manualmente baseados no ID.
+4. **Extração de Metadados:**
+   - Se o arquivo for `.html` (link externo), o Worker lê o conteúdo, extrai a URL original (YouTube/GitHub) via Regex e salva no campo `external_link`.
+5. **Finalização:** Atualiza o banco para `COMPLETED`, salva os IDs/Links do Drive e deleta o arquivo local.

@@ -55,3 +55,13 @@ O tema foi configurado em `src/theme/index.js` para espelhar a identidade visual
 
 ### 8. Dropzone Permissiva
 - Expandido `accept` para incluir PPTX, Vídeos (MP4/WebM) e variações de ZIP/RAR, cobrindo todos os cenários de entrega docente.
+
+
+### 9. Módulo de Upload e Validação
+## [2026-02-10]
+**Componentes:** `UploadPage.jsx` e Modal de Edição em `MyFoldersPage.jsx`.
+
+**Regras de Negócio Implementadas:**
+1. **Validação "Porteiro":** O evento `onDrop` intercepta os arquivos. Utiliza Regex `/^[a-zA-Z0-9._-]+$/` para rejeitar arquivos com caracteres especiais e notifica o usuário via Toast (Mantine Notifications).
+2. **Conversão de Links:** Inputs de texto para URL transformam a string em um `Blob` (arquivo virtual) do tipo `text/html` contendo um script de redirecionamento. Isso permite unificar a lógica de envio (tudo é arquivo).
+3. **Upload Unificado:** Tanto a criação quanto a edição utilizam `FormData` e delegam o processamento pesado para o Backend.

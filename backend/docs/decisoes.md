@@ -141,3 +141,12 @@
 - **Listagem de Disciplinas (`/api/metadata/disciplines`)**: 
   - Alterado para listar a tabela `disciplines` completa em vez de `submission_folders`.
   - Motivo: Permitir que o professor selecione matérias mesmo que ainda não existam pastas criadas para elas no semestre atual (Lógica *Lazy Creation*).
+
+## [2026-02-10] Estratégia de Sanitização de Arquivos e Upload
+**Contexto:**
+Houve problemas recorrentes com arquivos contendo caracteres especiais (acentos, cedilha, emojis) corrompendo nomes no Banco de Dados ou no Google Drive, gerando erros de codificação na API. Tentativas de sanitização puramente no Backend resultaram em duplicidade de lógica e persistência de erros em alguns fluxos.
+
+**Decisão:**
+1. **Bloqueio no Frontend (Porteiro):** Implementada validação estrita no React (`Dropzone`). O usuário é impedido de enviar arquivos com nomes fora do padrão `[a-zA-Z0-9._-]`.
+2. **Fallback no Backend:** Mantivemos a função `sanitizeFilename` no Worker e Controllers como segurança redundante, caso a validação do front seja burlada, mas a "fonte da verdade" é a prevenção no client-side.
+3. **Links como Arquivos:** Links externos (YouTube/GitHub) são convertidos em arquivos `.html` (redirecionamento) no Frontend antes do envio, permitindo que o sistema os trate como qualquer outro arquivo no fluxo do Google Drive.

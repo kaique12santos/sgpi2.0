@@ -200,6 +200,49 @@ export default function UploadPage() {
         }
     };
 
+    // Função Validadora (O Porteiro 👮‍♂️)
+    const handleFilesDrop = (acceptedFiles) => {
+        const invalidFiles = [];
+        
+        // Regex: Permite APENAS letras (a-z), números, ponto, traço e underline.
+        // NADA de espaços, acentos, ç ou emojis.
+        const safePattern = /^[a-zA-Z0-9._-]+$/;
+
+        const validFiles = acceptedFiles.filter((file) => {
+            if (!safePattern.test(file.name)) {
+                invalidFiles.push(file.name);
+                return false;
+            }
+            return true;
+        });
+
+        // Se houver arquivos inválidos, mostra o alerta e NÃO adiciona nada
+        if (invalidFiles.length > 0) {
+            notifications.show({
+                title: 'Nome de arquivo inválido!',
+                message: (
+                    <>
+                        Os seguintes arquivos contêm acentos, espaços ou caracteres especiais:
+                        <br />
+                        <strong>{invalidFiles.join(', ')}</strong>
+                        <br /><br />
+                        Por favor, renomeie-os usando apenas letras, números, underline (_) ou traço (-).
+                    </>
+                ),
+                color: 'red',
+                autoClose: 10000, // Fica 10 segundos na tela pra ele ler
+            });
+            
+            // Opcional: Se quiser aceitar os válidos mesmo assim, descomente abaixo.
+            // Mas geralmente é melhor forçar o usuário a arrumar tudo.
+            // setFiles((current) => [...current, ...validFiles]);
+            return; 
+        }
+
+        // Se passou no teste, adiciona na lista
+        setFiles((current) => [...current, ...validFiles]);
+    };
+
     // Encontrar o objeto da disciplina selecionada para mostrar no Modal
     const selectedDiscObj = disciplinas.find(d => d.value === form.values.discipline);
 
@@ -262,7 +305,7 @@ export default function UploadPage() {
                     
                     {/* DROPZONE CORRIGIDO */}
                     <Dropzone
-                        onDrop={setFiles}
+                        onDrop={handleFilesDrop}
                         maxFiles={10}
                         maxSize={50 * 1024 * 1024} // 50MB
                         accept={[

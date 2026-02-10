@@ -2,8 +2,9 @@ const DriveService = require('../services/googleDriveService');
 const SubmissionFolderRepository = require('../repositories/SubmissionFolderRepository');
 const DocumentRepository = require('../repositories/DocumentRepository');
 const UploadQueueWorker = require('../services/UploadQueueWorker');
-// Assumindo que você tem este repository baseado no seu FolderController
 const MetadataRepository = require('../repositories/MetadataRepository');
+
+
 class UploadController {
 
     /**

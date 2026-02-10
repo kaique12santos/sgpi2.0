@@ -50,16 +50,27 @@ class DocumentRepository {
     }
 
     async updateStatus(id, status, driveData = {}) {
+        console.log('CHAMOU REPO:', driveData);
         let sql = `UPDATE documents SET status = ?`;
         const params = [status];
+
+        // Debug: Vamos ver o que chega no Repositório
+        if (driveData.externalLink) {
+            console.log(`💾 [Repo] Salvando external_link no banco: ${driveData.externalLink}`);
+        }
 
         // Se tiver ID do Drive, atualiza os campos
         if (driveData && (driveData.id || driveData.drive_file_id)) {
             const realDriveId = driveData.id || driveData.drive_file_id;
             
-            // Note que aqui usamos os nomes exatos do seu CREATE TABLE
+            // USE O NOME EXATO DAS COLUNAS DO SEU BANCO
             sql += `, drive_file_id = ?, drive_web_link = ?, drive_download_link = ?`;
             params.push(realDriveId, driveData.webViewLink, driveData.webContentLink);
+        }
+
+        if (driveData.externalLink) {
+            sql += `, external_link = ?`; 
+            params.push(driveData.externalLink);
         }
 
         if (driveData.error) {

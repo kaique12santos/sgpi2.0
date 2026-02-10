@@ -1,6 +1,12 @@
 const DriveService = require('../services/googleDriveService');
 const MetadataRepository = require('../repositories/MetadataRepository');
 const SubmissionFolderRepository = require('../repositories/SubmissionFolderRepository');
+const Database = require('../config/Database.js'); // Para consultas diretas (ex: inserir documentos)
+const UploadQueueWorker = require('../services/UploadQueueWorker');
+const DocumentRepository = require('../repositories/DocumentRepository');
+const fs = require('fs');
+const { sanitizeFilename } = require('../utils/stringUtils');
+
 
 class FolderController {
 
@@ -59,6 +65,23 @@ class FolderController {
                 drive_folder_id: packageFolder.id
             });
 
+            if (req.files && req.files.length > 0) {
+                 
+                
+                for (const file of req.files) {
+                    // AQUI ESTÁ O SEGREDO: Limpar o nome antes de salvar no banco!
+                    const cleanName = sanitizeFilename(file.original_name);
+
+                    await DocumentRepository.create({
+                        folder_id: packageFolder.id, // ID do Drive (conforme seu repository espera)
+                        original_name: cleanName,    // <--- USA O NOME LIMPO
+                        local_path: file.path,
+                        mime_type: file.mimetype,
+                        size_bytes: file.size
+                    });
+                }
+            }
+
             return res.status(201).json({
                 success: true,
                 message: 'Pacote criado com sucesso!',
@@ -72,6 +95,101 @@ class FolderController {
         } catch (error) {
             console.error('Erro ao criar pasta:', error);
             return res.status(500).json({ error: 'Erro interno ao criar estrutura de pastas.' });
+        }
+    }
+
+    /**
+     * Adiciona arquivos a uma pasta já existente.
+     * POST /api/folders/:id/files
+     */
+    async addFiles(req, res) {
+        try {
+           // 1. DEBUG: Vamos ver o que está chegando
+            console.log('📥 [addFiles] Params:', req.params);
+            console.log('📥 [addFiles] Body:', req.body);
+
+            // 2. CORREÇÃO: Tenta pegar o ID de várias formas (id ou folderId)
+            const folderId = req.params.id || req.params.folderId;
+            const userId = req.userId;
+
+            // 3. TRAVA DE SEGURANÇA: Se não achou ID nenhum, para aqui e não quebra o banco
+            if (!folderId) {
+                console.error('❌ Erro: ID da pasta não encontrado nos parâmetros.');
+                return res.status(400).json({ error: 'ID da pasta é obrigatório.' });
+            }
+
+            // 4. Agora é seguro chamar o repositório
+            const folder = await SubmissionFolderRepository.findById(folderId);
+            
+            if (!folder) {
+                return res.status(404).json({ error: 'Pasta de entrega não encontrada.' });
+            }
+
+        
+
+            // 2. Se tiver arquivos chegando (seja ZIP, PDF ou o HTML do Link)
+            if (req.files && req.files.length > 0) {
+                
+                for (const file of req.files) {
+                    // A. Limpa o nome (igual no create)
+                    const cleanName = sanitizeFilename(file.originalname);
+
+                    // B. Salva no banco como 'PENDING'
+                    // O repository já define 'PENDING' por padrão no create
+                    await DocumentRepository.create({
+                        folder_id: folder.drive_folder_id,
+                        original_name: cleanName,
+                        local_path: file.path,
+                        mime_type: file.mimetype,
+                        size_bytes: file.size
+                    });
+                }
+
+                // C. Acorda o Worker para processar a fila agora mesmo
+                UploadQueueWorker.processQueue();
+            }
+
+            return res.status(200).json({ 
+                success: true, 
+                message: 'Arquivos adicionados à fila de processamento.' 
+            });
+
+        } catch (error) {
+            console.error('Erro ao adicionar arquivos:', error);
+            return res.status(500).json({ error: 'Erro interno ao salvar arquivos.' });
+        }
+    }
+
+    /**
+     * Lista os arquivos de uma pasta específica (GET /api/folders/:id/files)
+     */
+    async listFiles(req, res) {
+        try {
+            const { id } = req.params;
+            const userId = req.userId;
+
+            // 1. Segurança: Verifica se a pasta pertence ao usuário
+            const folder = await SubmissionFolderRepository.findById(id);
+            if (!folder) return res.status(404).json({ error: 'Pasta não encontrada.' });
+            
+            if (folder.user_id !== userId) {
+                return res.status(403).json({ error: 'Sem permissão para ver estes arquivos.' });
+            }
+
+            // 2. Busca os documentos
+            // Ajuste 'original_name' caso tenha mudado para 'name' no passo anterior
+            const sql = `
+                SELECT id, original_name as name, mime_type, size_bytes as size, drive_web_link, status, external_link
+                FROM documents 
+                WHERE folder_id = ?
+            `;
+            const files = await Database.query(sql, [id]);
+
+            return res.json(files);
+
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Erro ao listar arquivos.' });
         }
     }
 

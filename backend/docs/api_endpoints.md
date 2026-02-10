@@ -177,3 +177,14 @@ Remove a pasta e todos os seus documentos (Cascade). No Drive, move para a lixei
 - **Rota:** `DELETE /api/folders/:id`
 - **Retorno:** `{ "success": true }`
 
+## [2026-02-10] Endpoints de Arquivos
+
+### POST `/uploads/add-files/:id`
+Adiciona novos arquivos a uma pasta de entrega existente (Fluxo de Edição).
+
+- **Parâmetros:** `:id` (Aceita tanto o ID numérico do Banco quanto o Hash ID do Google Drive, tratado internamente).
+- **Body:** `Multipart/Form-Data` contendo os arquivos.
+- **Comportamento:**
+  - Não realiza o upload síncrono.
+  - Salva os arquivos como `PENDING` e delega para o `UploadQueueWorker`.
+  - Retorna `200 OK` imediatamente para liberar a UI.
