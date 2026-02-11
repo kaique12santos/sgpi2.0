@@ -1,19 +1,17 @@
-import React, { useContext } from 'react';
-import { Container, Title, Text, SimpleGrid, Card, Group, ThemeIcon, Button, RingProgress, Paper } from '@mantine/core';
-import { AuthContext } from '../context/AuthContext';
+import React, { useEffect, useState } from 'react';
 import { 
-    IconFiles, 
-    IconClock, 
-    IconAlertCircle, 
-    IconCheck, 
-    IconUsers, 
-    IconFolder, 
-    IconUpload 
+    Container, Title, Text, SimpleGrid, Card, Group, ThemeIcon, 
+    Button, RingProgress, Paper, Skeleton 
+} from '@mantine/core';
+import { 
+    IconFiles, IconClock, IconAlertCircle, IconCheck, 
+    IconUsers, IconFolder, IconUpload, IconDatabase 
 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
+import api from '../api/axios';
 
-// --- SUB-COMPONENTE: Visão do Professor ---
-const ProfessorDashboard = ({ user, navigate }) => {
+// --- VISÃO DO PROFESSOR (Com Cores do Tema) ---
+const ProfessorDashboard = ({ stats, navigate, loading }) => {
     return (
         <>
             <Text c="dimmed" mb="xl">
@@ -21,29 +19,49 @@ const ProfessorDashboard = ({ user, navigate }) => {
             </Text>
 
             <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="lg">
+                {/* CARD 1: STATUS DO SISTEMA */}
                 <Card shadow="sm" padding="lg" radius="md" withBorder>
                     <Group justify="space-between" mb="xs">
-                        <Text fw={500}>Status Atual</Text>
-                        <ThemeIcon color="green" variant="light"><IconCheck size="1.2rem" /></ThemeIcon>
+                        <Text fw={500}>Status da Fila</Text>
+                        {stats.pendingCount > 0 ? (
+                            // Mantemos Orange/Green pois são cores semânticas de status (Aviso/Sucesso)
+                            <ThemeIcon color="orange" variant="light"><IconClock size="1.2rem" /></ThemeIcon>
+                        ) : (
+                            <ThemeIcon color="green" variant="light"><IconCheck size="1.2rem" /></ThemeIcon>
+                        )}
                     </Group>
-                    <Text fz="xl" fw={700}>Em dia</Text>
-                    <Text size="xs" c="dimmed" mt="sm">Nenhuma pendência urgente</Text>
+                    
+                    <Skeleton visible={loading}>
+                        <Text fz="xl" fw={700}>
+                            {stats.pendingCount > 0 ? 'Processando' : 'Tudo Pronto'}
+                        </Text>
+                        <Text size="xs" c="dimmed" mt="sm">
+                            {stats.pendingCount > 0 
+                                ? `${stats.pendingCount} arquivos na fila` 
+                                : 'Nenhuma pendência de upload'}
+                        </Text>
+                    </Skeleton>
                 </Card>
 
+                {/* CARD 2: MEUS ENVIOS */}
                 <Card shadow="sm" padding="lg" radius="md" withBorder>
                     <Group justify="space-between" mb="xs">
                         <Text fw={500}>Meus Envios</Text>
-                        <ThemeIcon color="blue" variant="light"><IconFiles size="1.2rem" /></ThemeIcon>
+                        {/* Usando fatecBlue para informação secundária */}
+                        <ThemeIcon color="fatecBlue" variant="light"><IconFiles size="1.2rem" /></ThemeIcon>
                     </Group>
-                    <Text fz="xl" fw={700}>4 Arquivos</Text>
-                    <Text size="xs" c="dimmed" mt="sm">Último envio há 2 dias</Text>
+                    <Skeleton visible={loading}>
+                        <Text fz="xl" fw={700}>{stats.submissionsCount || 0} Pastas</Text>
+                        <Text size="xs" c="dimmed" mt="sm">Pacotes enviados</Text>
+                    </Skeleton>
                 </Card>
 
+                {/* CARD 3: AÇÃO RÁPIDA (Primária) */}
                 <Card shadow="sm" padding="lg" radius="md" withBorder style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                     <Button 
                         fullWidth 
                         leftSection={<IconUpload size={20} />} 
-                        color="fatecRed"
+                        color="fatecRed" /* <--- AQUI: Cor Primária da Marca */
                         onClick={() => navigate('/dashboard/novo-envio')}
                     >
                         Nova Entrega
@@ -51,13 +69,13 @@ const ProfessorDashboard = ({ user, navigate }) => {
                 </Card>
             </SimpleGrid>
 
-            {/* Exemplo de Card de Aviso */}
-            <Paper withBorder p="md" radius="md" mt="lg" bg="yellow.0">
+            {/* CARD DE AVISO */}
+            <Paper withBorder p="md" radius="md" mt="lg" bg="gray.0">
                 <Group>
-                    <IconAlertCircle color="orange" />
+                    <IconAlertCircle color="gray" />
                     <div>
-                        <Text fw={500}>Próximo Prazo: 20/02/2026</Text>
-                        <Text size="sm">Entrega da Documentação Técnica (Sprint 1)</Text>
+                        <Text fw={500}>Lembrete de Prazo</Text>
+                        <Text size="sm">Verifique o calendário acadêmico para as próximas entregas.</Text>
                     </div>
                 </Group>
             </Paper>
@@ -65,107 +83,108 @@ const ProfessorDashboard = ({ user, navigate }) => {
     );
 };
 
-// --- SUB-COMPONENTE: Visão do Coordenador ---
-const CoordinatorDashboard = ({ user }) => {
+// --- VISÃO DO COORDENADOR (Limpá e Focada em Infra) ---
+const CoordinatorDashboard = ({ stats, loading }) => {
+    
+    // Formata bytes para GB/MB
+    const formatBytes = (bytes) => {
+        if (!bytes || isNaN(bytes)) return '0 B';
+        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+        return `${parseFloat((bytes / Math.pow(1024, i)).toFixed(2))} ${sizes[i]}`;
+    };
+
     return (
         <>
              <Text c="dimmed" mb="xl">
-                Visão geral do semestre e conformidade dos documentos.
+                Visão geral da infraestrutura e volume de dados do SGPI.
             </Text>
 
-            <SimpleGrid cols={{ base: 1, sm: 4 }} spacing="lg">
+            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="lg">
+                
+                {/* CARD 1: TOTAL DE PASTAS (GLOBAL) */}
                 <Card shadow="sm" padding="lg" radius="md" withBorder>
                     <Group justify="space-between" mb="xs">
-                        <Text fw={500} size="sm">Total Alunos</Text>
-                        <IconUsers size="1.2rem" color="gray" />
+                        <Text fw={500} size="sm">Pastas no Drive</Text>
+                        <ThemeIcon color="teal" variant="light">
+                            <IconFolder size="1.2rem" />
+                        </ThemeIcon>
                     </Group>
-                    <Text fz="xl" fw={700}>142</Text>
+                    <Skeleton visible={loading}>
+                        <Text fz="xl" fw={700}>{stats.totalFolders || 0}</Text>
+                        <Text size="xs" c="dimmed" mt="sm">Total acumulado</Text>
+                    </Skeleton>
                 </Card>
 
+                {/* CARD 2: USO DO ARMAZENAMENTO */}
                 <Card shadow="sm" padding="lg" radius="md" withBorder>
                     <Group justify="space-between" mb="xs">
-                        <Text fw={500} size="sm">Pastas Criadas</Text>
-                        <IconFolder size="1.2rem" color="gray" />
+                        <Text fw={500} size="sm">Armazenamento Usado</Text>
+                        <ThemeIcon color="cyan" variant="light">
+                            <IconDatabase size="1.2rem" />
+                        </ThemeIcon>
                     </Group>
-                    <Text fz="xl" fw={700}>28</Text>
+                    <Skeleton visible={loading}>
+                        <Text fz="xl" fw={700}>{formatBytes(stats.totalStorage)}</Text>
+                        <Text size="xs" c="dimmed" mt="sm">Volume total de arquivos</Text>
+                    </Skeleton>
                 </Card>
 
+                {/* CARD 3: USUÁRIOS/PROFESSORES (Opcional - Pode remover se quiser) */}
                 <Card shadow="sm" padding="lg" radius="md" withBorder>
                     <Group justify="space-between" mb="xs">
-                        <Text fw={500} size="sm">Uso do Drive</Text>
-                        <IconFiles size="1.2rem" color="gray" />
+                        <Text fw={500} size="sm">Usuários Ativos</Text>
+                        <ThemeIcon color="indigo" variant="light">
+                            <IconUsers size="1.2rem" />
+                        </ThemeIcon>
                     </Group>
-                    <Text fz="xl" fw={700}>4.2 GB</Text>
+                    <Skeleton visible={loading}>
+                        <Text fz="xl" fw={700}>{stats.totalUsers || 0}</Text>
+                        <Text size="xs" c="dimmed" mt="sm">Professores cadastrados</Text>
+                    </Skeleton>
                 </Card>
 
-                <Card shadow="sm" padding="lg" radius="md" withBorder>
-                    <Group justify="space-between" mb="xs">
-                        <Text fw={500} size="sm">Pendências</Text>
-                        <IconAlertCircle size="1.2rem" color="red" />
-                    </Group>
-                    <Text fz="xl" fw={700} c="red">3</Text>
-                    <Text size="xs" c="red">Prazos vencidos</Text>
-                </Card>
             </SimpleGrid>
 
-            <Title order={4} mt="xl" mb="md">Progresso de Entregas (Semestre Atual)</Title>
-            <Group>
-                <Paper withBorder radius="md" p="xs">
-                     <Group>
-                        <RingProgress
-                            size={80}
-                            roundCaps
-                            thickness={8}
-                            sections={[{ value: 65, color: 'blue' }]}
-                            label={
-                                <Text c="blue" fw={700} ta="center" size="xl">65%</Text>
-                            }
-                        />
-                        <div>
-                            <Text c="dimmed" size="xs" tt="uppercase" fw={700}>Documentação</Text>
-                            <Text fw={700} size="xl">65/100</Text>
-                        </div>
-                    </Group>
-                </Paper>
-
-                <Paper withBorder radius="md" p="xs">
-                     <Group>
-                        <RingProgress
-                            size={80}
-                            roundCaps
-                            thickness={8}
-                            sections={[{ value: 30, color: 'orange' }]}
-                            label={
-                                <Text c="orange" fw={700} ta="center" size="xl">30%</Text>
-                            }
-                        />
-                        <div>
-                            <Text c="dimmed" size="xs" tt="uppercase" fw={700}>Código Fonte</Text>
-                            <Text fw={700} size="xl">30/100</Text>
-                        </div>
-                    </Group>
-                </Paper>
-            </Group>
+            
         </>
     );
 };
 
 // --- COMPONENTE PRINCIPAL ---
-export default function Dashboard() {
-    const { user } = useContext(AuthContext);
+export default function DashboardPage() {
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState({});
+
+    const user = JSON.parse(localStorage.getItem('sgpi_user') || '{}');
+    const userRole = user.role || 'professor';
+
+    useEffect(() => {
+        async function loadData() {
+            try {
+                const response = await api.get('/dashboard/stats');
+                setStats(response.data);
+            } catch (error) {
+                console.error("Erro ao carregar dashboard:", error);
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadData();
+    }, []);
 
     return (
-        <Container size="xl">
-            <Title order={2} mb="xs">Olá, {user?.name}!</Title>
+        <Container size="xl" py="xl">
+            <Title order={2} mb="xs">Olá, {user?.name || 'Professor'}!</Title>
             
-            {/* Renderização Condicional Inteligente */}
-            {user?.role === 'coordenador' ? (
-                <CoordinatorDashboard user={user} />
+            {userRole === 'coordenador' ? (
+                <CoordinatorDashboard stats={stats} loading={loading} />
             ) : (
-                <ProfessorDashboard user={user} navigate={navigate} />
+                <ProfessorDashboard stats={stats} navigate={navigate} loading={loading} />
             )}
             
         </Container>
     );
 }
+

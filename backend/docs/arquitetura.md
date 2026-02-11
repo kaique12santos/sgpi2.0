@@ -78,3 +78,14 @@ O sistema utiliza um padrão de Fila para uploads pesados e geração de links, 
 4. **Extração de Metadados:**
    - Se o arquivo for `.html` (link externo), o Worker lê o conteúdo, extrai a URL original (YouTube/GitHub) via Regex e salva no campo `external_link`.
 5. **Finalização:** Atualiza o banco para `COMPLETED`, salva os IDs/Links do Drive e deleta o arquivo local.
+
+#### 12. Atualize com o novo controlador.
+
+## [2026-02-11] Módulo Dashboard
+**Responsabilidade:** Agregar dados para visualização rápida sem processamento pesado.
+**Componente:** `DashboardController`.
+
+**Fluxo de Dados:**
+1. O controlador identifica a `role` do usuário via Banco de Dados (para garantir consistência além do Token).
+2. Executa queries `COUNT` e `SUM` otimizadas.
+3. Não realiza cruzamento de dados complexos para manter a performance da Home alta.

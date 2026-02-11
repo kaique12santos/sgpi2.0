@@ -65,3 +65,13 @@ O tema foi configurado em `src/theme/index.js` para espelhar a identidade visual
 1. **Validação "Porteiro":** O evento `onDrop` intercepta os arquivos. Utiliza Regex `/^[a-zA-Z0-9._-]+$/` para rejeitar arquivos com caracteres especiais e notifica o usuário via Toast (Mantine Notifications).
 2. **Conversão de Links:** Inputs de texto para URL transformam a string em um `Blob` (arquivo virtual) do tipo `text/html` contendo um script de redirecionamento. Isso permite unificar a lógica de envio (tudo é arquivo).
 3. **Upload Unificado:** Tanto a criação quanto a edição utilizam `FormData` e delegam o processamento pesado para o Backend.
+
+### 10. Dashboard Dinâmico
+## [2026-02-11] 
+**Componente:** `DashboardPage.jsx`
+
+**Lógica de Renderização:**
+- Utiliza renderização condicional baseada na `role` do usuário (`PROFESSOR` vs `COORDENADOR`).
+- **Professor:** Foco em ações operacionais ("Nova Entrega") e feedback de status do Worker (Upload em andamento/Concluído).
+- **Coordenador:** Foco em monitoramento macro (Cards de Infraestrutura).
+- **Integração:** Consome `GET /dashboard/stats` e formata bytes para human-readable (MB, GB) no front.

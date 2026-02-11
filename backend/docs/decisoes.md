@@ -150,3 +150,12 @@ Houve problemas recorrentes com arquivos contendo caracteres especiais (acentos,
 1. **Bloqueio no Frontend (Porteiro):** Implementada validação estrita no React (`Dropzone`). O usuário é impedido de enviar arquivos com nomes fora do padrão `[a-zA-Z0-9._-]`.
 2. **Fallback no Backend:** Mantivemos a função `sanitizeFilename` no Worker e Controllers como segurança redundante, caso a validação do front seja burlada, mas a "fonte da verdade" é a prevenção no client-side.
 3. **Links como Arquivos:** Links externos (YouTube/GitHub) são convertidos em arquivos `.html` (redirecionamento) no Frontend antes do envio, permitindo que o sistema os trate como qualquer outro arquivo no fluxo do Google Drive.
+
+## [2026-02-11] Escopo do Dashboard do Coordenador (MVP)
+**Contexto:**
+Inicialmente, o design previa gráficos de progresso de alunos e conformidade de tarefas. Porém, na versão 1.0 (MVP), o sistema foca no recebimento e armazenamento seguro dos arquivos, sem gestão granular de tarefas/prazos de alunos individuais.
+
+**Decisão:**
+1. **Remoção de Métricas Fictícias:** Removemos os gráficos de pizza e contagem de "Alunos" do dashboard, pois esses dados não existem no modelo atual.
+2. **Foco em Infraestrutura:** O Dashboard do Coordenador deve exibir métricas de "Saúde do Sistema": Total de Pastas criadas (adoção) e Uso de Disco (custo/limite do Drive).
+3. **Role-Based Views:** O Backend entrega objetos de estatísticas diferentes (`global` vs `pessoal`) dependendo da role, ao invés do Frontend filtrar dados sensíveis.

@@ -364,7 +364,7 @@ export default function UploadPage() {
                         <Button variant="default" onClick={() => navigate('/dashboard')} disabled={uploading}>
                             Cancelar
                         </Button>
-                        <Button type="submit" color="blue" loading={uploading} leftSection={<IconCheck size={18}/>}>
+                        <Button type="submit" color="fatecRed" loading={uploading} leftSection={<IconCheck size={18}/>}>
                             Conferir e Enviar
                         </Button>
                     </Group>

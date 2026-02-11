@@ -188,3 +188,19 @@ Adiciona novos arquivos a uma pasta de entrega existente (Fluxo de Edição).
   - Não realiza o upload síncrono.
   - Salva os arquivos como `PENDING` e delega para o `UploadQueueWorker`.
   - Retorna `200 OK` imediatamente para liberar a UI.
+
+## [2026-02-11] Dashboard e Estatísticas
+
+### GET `/dashboard/stats`
+Retorna os contadores para a tela inicial baseados no perfil do usuário logado.
+
+- **Autenticação:** Obrigatória (Bearer Token).
+- **Lógica de Perfil:**
+  - **Professor:** Retorna contagem de *suas* pastas, envios e arquivos pendentes na fila.
+  - **Coordenador:** Retorna contagem *global* de pastas do sistema e total de armazenamento utilizado (soma de bytes).
+- **Resposta (Exemplo Professor):**
+  ```json
+  {
+    "submissionsCount": 12,
+    "pendingCount": 0
+  }
