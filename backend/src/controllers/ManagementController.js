@@ -3,6 +3,12 @@ const SubmissionFolderRepository = require('../repositories/SubmissionFolderRepo
 const DriveService = require('../services/googleDriveService');
 const fs = require('fs');
 
+
+/** * Controller para gerenciar ações de exclusão (Documentos e Pastas).
+ * 
+ * O endpoint DELETE /management/document/:id deleta um documento (arquivo ou link).
+ * O endpoint DELETE /management/folder/:id deleta uma pasta inteira (Pacote de Entrega) seguindo regras específicas.
+ */
 class ManagementController {
 
     /**

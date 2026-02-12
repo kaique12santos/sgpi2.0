@@ -1,7 +1,15 @@
 const SubmissionFolderRepository = require('../repositories/SubmissionFolderRepository'); // Importe o repositório
-
+/**
+ * Controller para gerenciar as pastas de entrega (SubmissionFolder) e seus arquivos.
+ */
 class SubmissionFolderController {
-    // Rota para listar todas as pastas (para o select do upload)
+    
+    /**
+     * Lista todas as pastas de entrega (SubmissionFolder) do sistema.
+     * @param {Object} req - Request object
+     * @param {Object} res - Response object
+     * @returns JSON com todas as pastas de entrega
+     */
     async index(req, res) {
         try {
             // Usa o novo método do repositório
@@ -16,7 +24,15 @@ class SubmissionFolderController {
         }
     }
 
-    // função para criar nova pasta de entrega (pacote)
+    /**
+     * Cria uma nova pasta de entrega (SubmissionFolder) e retorna seu ID.
+     * @param {Object} param0 - Parâmetros da nova pasta
+     * @param {string} param0.title - Título da nova pasta
+     * @param {number} param0.user_id - ID do usuário que criou
+     * @param {string} param0.drive_folder_id - ID da pasta no Google Drive
+     * @param {string} param0.parent_drive_id - ID da pasta pai (disciplina)
+     * @returns {number} ID da nova pasta criada
+     */
     async createNewPacket({ title, user_id, drive_folder_id, parent_drive_id }) {
         // Truque ninja: Usamos o parent_drive_id (ID da pasta da disciplina) 
         // para descobrir qual é o discipline_id e semester_id corretos via subquery
@@ -44,7 +60,12 @@ class SubmissionFolderController {
         return result.insertId;
     }
 
-    // Rota para listar apenas as pastas do professor logado (com stats)
+    /**
+     * Lista as pastas de entrega do usuário logado, com estatísticas (total de arquivos, total processados, etc).
+     * @param {Object} req - Request object
+     * @param {Object} res - Response object
+     * @returns JSON com as pastas do usuário logado
+     */
     async listMyFolders(req, res) {
         try {
             const userId = req.userId; // Vem do AuthMiddleware

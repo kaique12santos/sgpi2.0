@@ -3,6 +3,12 @@ const DocumentRepository = require('../repositories/DocumentRepository');
 const SubmissionFolderRepository = require('../repositories/SubmissionFolderRepository');
 const DriveService = require('../services/googleDriveService');
 
+
+/** * Controller para download de arquivos.
+ * 
+ * O endpoint GET /download/folder/:folderId gera um ZIP com todos os arquivos de um Pacote de Entrega.
+ * O ZIP é gerado em tempo real (Streaming) para não lotar a memória do servidor.
+ */
 class DownloadController {
 
     /**

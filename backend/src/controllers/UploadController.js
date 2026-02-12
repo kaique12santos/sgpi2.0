@@ -4,7 +4,18 @@ const DocumentRepository = require('../repositories/DocumentRepository');
 const UploadQueueWorker = require('../services/UploadQueueWorker');
 const MetadataRepository = require('../repositories/MetadataRepository');
 
-
+/**
+ * Controller para gerenciar o processo de upload de arquivos, criação de pastas no Google Drive e 
+ * registro no banco de dados.
+ * 
+ * O endpoint POST /upload é responsável por receber os arquivos enviados pelo frontend, 
+ * garantir que a estrutura de pastas exista no Google Drive (semestre > disciplina > pacote), 
+ * criar a pasta do pacote, registrar tudo no banco de dados e enfileirar os arquivos para processamento.
+ * 
+ * Fluxo Hierárquico Completo:
+ * 1. Recebe os arquivos e os dados do pacote (title, discipline_id) do frontend.
+ * 2. Verifica se o semestre ativo tem uma pasta no Drive. Se não tiver, cria.
+ */
 class UploadController {
 
     /**

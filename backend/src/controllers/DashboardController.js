@@ -1,5 +1,10 @@
 const Database = require('../config/Database');
 
+/**
+ * Controller para o dashboard do professor e coordenador.
+ * 
+ * O endpoint GET /dashboard/stats retorna estatísticas diferentes dependendo do papel do usuário:
+ */
 class DashboardController {
     async getStats(req, res) {
         try {

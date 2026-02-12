@@ -7,7 +7,9 @@ const DocumentRepository = require('../repositories/DocumentRepository');
 const fs = require('fs');
 const { sanitizeFilename } = require('../utils/stringUtils');
 
-
+/**
+ * Controller para gerenciar as pastas de entrega (SubmissionFolder) e seus arquivos.
+ */
 class FolderController {
 
     /**

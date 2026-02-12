@@ -1,5 +1,8 @@
 const Database = require('../config/Database.js');
 
+/**
+ * Controller para gerenciar metadados do sistema, como disciplinas e semestres.
+ */
 class MetadataController {
 
     /**

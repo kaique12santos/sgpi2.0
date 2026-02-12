@@ -1,5 +1,13 @@
 const DocumentRepository = require('../repositories/DocumentRepository');
 
+
+/**
+ * Controller para gerenciar os links de referência (YouTube, Docs, etc) associados a um Pacote de Entrega.
+ * 
+ * O endpoint POST /folders/:folderId/links permite adicionar um link de referência a um pacote.
+ * O link é salvo como um documento com um ID especial (drive_file_id = 'LINK_EXTERNO') para diferenciá-lo 
+ * dos arquivos normais do Drive.
+ */
 class LinkController {
 
     /**

@@ -1,7 +1,27 @@
 const GoogleDriveService = require('../services/googleDriveService.js');
 const Database = require('../config/Database.js');
 
+/**
+ * Controller para criar a estrutura inicial de pastas no Google Drive e no banco de dados.
+ * 
+ * O endpoint POST /setup/create-semester-folders é um script de configuração que
+ * deve ser executado apenas uma vez para criar a estrutura de pastas do semestre
+ * no Google Drive e as entradas correspondentes no banco de dados.
+ * Ele cria uma pasta para o semestre (ex: "2099_2") e, dentro dela, pastas para cada disciplina cadastrada. 
+ * Cada pasta de disciplina é registrada na tabela submission_folders com o ID da pasta do Drive.
+ */
+
 class SetupController {
+
+    /**
+     * Roda o script de criação de pastas para um semestre específico.
+     * @param {Object} req - Request object
+     * @param {Object} res - Response object
+     * @returns JSON com o resultado da operação
+     * 
+     * NOTA: Este endpoint deve ser protegido (ex: autenticação + verificação de papel) 
+     * para evitar execuções acidentais.
+     */
     async createSemesterFolders(req, res) {
         // ID REAL da pasta SGPI_ACADEMIC (sem o ?hl=pt-br)
         const ROOT_FOLDER_ID = '14qPDNB_-r2_jwcVZegJQ-aD4SsqFACtm'; 

@@ -1,8 +1,17 @@
 const Database = require('../config/Database');
 
+/**
+ * Repositório para gerenciar documentos enviados pelos professores.
+ * Focado em criação, leitura e atualização de status.
+ */
 class DocumentRepository {
     
-    // --- MÉTODO CORRIGIDO (SEM TITLE, MAS COM A CONVERSÃO DE ID) ---
+    /**
+     * Cria um novo registro de documento. 
+     * O campo 'title' foi removido, pois agora usamos 'original_name'
+     *  para armazenar o nome do arquivo enviado.
+     * @returns {Promise<number>} ID do documento criado.
+     */
     async create({ folder_id, original_name, local_path, mime_type, size_bytes }) {
         
         // 1. A query não tem mais o campo 'title'
@@ -35,8 +44,10 @@ class DocumentRepository {
         return result.insertId;
     }
 
-    // --- MÉTODOS DA FILA (MANTIDOS) ---
-
+    /**
+     * Encontra o próximo documento pendente para processamento.
+     * @returns {Promise<Object>} O documento pendente mais antigo.
+     */
     async findNextPending() {
         const sql = `
             SELECT * FROM documents 
@@ -49,6 +60,12 @@ class DocumentRepository {
         return rows[0];
     }
 
+    /**
+     *  Atualiza o status de um documento, e opcionalmente os dados do Drive.
+     * @param {number} id do documento a ser atualizado
+     * @param {string} status (NOVO STATUS: 'COMPLETED', 'PENDING', etc.) 
+     * @param {Object} driveData (Dados opcionais do Drive: { id, webViewLink, webContentLink, externalLink, error })
+     */
     async updateStatus(id, status, driveData = {}) {
         console.log('CHAMOU REPO:', driveData);
         let sql = `UPDATE documents SET status = ?`;
@@ -88,7 +105,11 @@ class DocumentRepository {
         await Database.query(sql, params);
     }
 
-    // Criação de Link Externo (Sem title também, para não quebrar)
+    /**
+     * Cria um link externo como documento, associando à pasta correta.
+     * @param {Object} param Objeto com folder_id, url e original_name (nome do link)
+     * @returns {Promise<number>} ID do documento criado.
+     */
     async createLink({ folder_id, url, original_name }) { // Trocamos title por original_name
         const sql = `
             INSERT INTO documents 
@@ -104,6 +125,7 @@ class DocumentRepository {
         return result.insertId;
     }
 
+    // --- MÉTODOS DE LEITURA ---
     async findAllByFolder(folderId) {
         const sql = `SELECT * FROM documents WHERE folder_id = ? AND status = 'COMPLETED'`;
         return await Database.query(sql, [folderId]);
@@ -115,6 +137,7 @@ class DocumentRepository {
         return rows[0];
     }
 
+    // --- MÉTODO DE EXCLUSÃO (CASO QUEIRA IMPLEMENTAR) ---
     async delete(id) {
         const sql = `DELETE FROM documents WHERE id = ?`;
         await Database.query(sql, [id]);
