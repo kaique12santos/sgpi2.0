@@ -170,3 +170,14 @@ Ajustada a query no `SubmissionFolderRepository` para comparar `documents.folder
 
 **Decisão de Arquitetura:**
 Optou-se por criar um método `findAllWithDetails` no Repositório que utiliza `JOIN` com a tabela `users` para entregar o nome do professor diretamente na listagem, evitando múltiplas requisições no Frontend ("N+1 problem").
+
+## [2026-02-15] Política de Exclusão de Entregas
+**Contexto:**
+O Coordenador precisa de ferramentas para limpar o sistema, mas a instituição deve obedecer à legislação de guarda de documentos acadêmicos pelo periodo que o aluno tem para terminar os cursos de 5 anos.
+
+**Decisão:**
+Implementado um "Soft Block" no Backend:
+- O sistema calcula a idade da pasta (`Date.now() - created_at`).
+- Se `< 5 anos` e contiver arquivos: **Bloqueia** e retorna erro informativo.
+- Se `< 5 anos` e estiver vazia: **Permite** (entende-se como erro de criação).
+- Se `> 5 anos`: **Permite** (expirou o prazo legal).

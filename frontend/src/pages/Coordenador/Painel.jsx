@@ -5,16 +5,22 @@ import {
 } from '@mantine/core';
 import { 
     IconSearch, IconBrandGoogleDrive, IconFolder, IconFileText, 
-    IconAlertCircle, IconCheck, IconExternalLink 
+    IconAlertCircle, IconCheck, IconExternalLink, IconDownload, IconTrash
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
+import { modals } from '@mantine/modals'; 
 import api from '../../api/axios';
-import { getDisciplineColor } from '../../utils/CoresAuxiliares'; // Certifique-se que esse arquivo existe
+import { getDisciplineColor } from '../../utils/CoresAuxiliares'; 
+
 
 export default function CoordinatorPanelPage() {
     const [folders, setFolders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+
+    const [downloadingId, setDownloadingId] = useState(null);
+
+    const [deletingId, setDeletingId] = useState(null);
     
     // Paginação (opcional, mas bom ter preparado)
     const [activePage, setActivePage] = useState(1);
@@ -41,6 +47,115 @@ export default function CoordinatorPanelPage() {
         loadFolders();
     }, []);
 
+   const handleDeleteFolder = (folder) => {
+        // Abre o modal elegante do Mantine
+        modals.openConfirmModal({
+            title: <Text fw={700}>Excluir Entrega Permanente</Text>,
+            centered: true,
+            children: (
+                <Text size="sm">
+                    Você está prestes a excluir a entrega <strong>{folder.title}</strong> do professor <strong>{folder.professor_name}</strong>.
+                    <br /><br />
+                    Essa ação apagará todos os arquivos do Drive e o registro do banco.
+                    <br />
+                    <Text span c="dimmed" size="xs">Nota: A exclusão só será permitida se a pasta estiver vazia ou tiver mais de 5 anos.</Text>
+                </Text>
+            ),
+            labels: { confirm: 'Sim, excluir pasta', cancel: 'Cancelar' },
+            confirmProps: { color: 'red' }, // Botão vermelho para perigo
+            onConfirm: async () => {
+                // A lógica de exclusão vem para cá (callback do Confirmar)
+                try {
+                    setDeletingId(folder.id); // Ativa spinner na lixeira da tabela
+
+                    // Chama a rota de DELETE
+                    await api.delete(`/management/folders/${folder.id}`);
+
+                    // Sucesso: Remove da lista visualmente
+                    setFolders((current) => current.filter((f) => f.id !== folder.id));
+
+                    notifications.show({
+                        title: 'Pasta Excluída',
+                        message: 'O registro e os arquivos foram removidos.',
+                        color: 'green',
+                        icon: <IconCheck size={16} />
+                    });
+
+                } catch (error) {
+                    console.error('Erro ao deletar:', error);
+                    
+                    const errorMsg = error.response?.data?.error || 'Erro ao excluir pasta.';
+                    
+                    notifications.show({
+                        title: 'Ação Bloqueada',
+                        message: errorMsg,
+                        color: 'red',
+                        autoClose: 6000,
+                        icon: <IconAlertCircle size={16} />
+                    });
+                } finally {
+                    setDeletingId(null);
+                }
+            },
+        });
+    };
+
+    const handleDownloadZip = async (folderId, folderTitle) => {
+        try {
+            setDownloadingId(folderId); // Ativa spinner neste botão
+            
+            notifications.show({ 
+                id: 'download-load', 
+                loading: true, 
+                title: 'Gerando ZIP...', 
+                message: 'Isso pode levar alguns segundos.', 
+                autoClose: false, 
+                withCloseButton: false 
+            });
+
+            // Chama a API pedindo o arquivo (responseType: 'blob' é essencial!)
+            const response = await api.get(`/downloads/folder/${folderId}`, {
+                responseType: 'blob' 
+            });
+
+            // Cria um link temporário no navegador para forçar o download
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            
+            // Define o nome do arquivo (Sanitiza o título para não quebrar)
+            const safeName = folderTitle.replace(/[^a-z0-9]/gi, '_');
+            link.setAttribute('download', `${safeName}.zip`);
+            
+            document.body.appendChild(link);
+            link.click();
+            
+            // Limpeza
+            link.remove();
+            window.URL.revokeObjectURL(url);
+
+            notifications.update({ 
+                id: 'download-load', 
+                color: 'green', 
+                title: 'Download Iniciado', 
+                message: 'O arquivo ZIP foi transferido.', 
+                icon: <IconCheck size={16} />, 
+                autoClose: 3000 
+            });
+
+        } catch (error) {
+            console.error('Erro download:', error);
+            notifications.update({ 
+                id: 'download-load', 
+                color: 'red', 
+                title: 'Falha no Download', 
+                message: 'Não foi possível gerar o pacote ZIP.', 
+                autoClose: 4000 
+            });
+        } finally {
+            setDownloadingId(null);
+        }
+    };
     // Função de Filtragem (Busca por Professor, Disciplina ou Título)
     const filteredFolders = folders.filter(folder => {
         const query = search.toLowerCase();
@@ -130,10 +245,27 @@ export default function CoordinatorPanelPage() {
                 </Group>
             </Table.Td>
 
+
             {/* 5. AÇÕES */}
-            <Table.Td>
-                <Group gap={0} justify="flex-end">
-                    <Tooltip label="Abrir pasta no Google Drive">
+          <Table.Td>
+                <Group gap={4} justify="flex-end">
+                    
+                    {/* Botão Download */}
+                    <Tooltip label="Baixar Pacote ZIP">
+                        <ActionIcon 
+                            variant="light" 
+                            color="teal" 
+                            size="lg"
+                            loading={downloadingId === folder.id}
+                            onClick={() => handleDownloadZip(folder.id, folder.title)}
+                            disabled={folder.total_files === 0}
+                        >
+                            <IconDownload size={20} />
+                        </ActionIcon>
+                    </Tooltip>
+
+                    {/* Botão Drive */}
+                    <Tooltip label="Abrir no Google Drive">
                         <ActionIcon 
                             variant="subtle" 
                             color="blue" 
@@ -146,10 +278,19 @@ export default function CoordinatorPanelPage() {
                         </ActionIcon>
                     </Tooltip>
 
-                    {/* Futuro: Botão de Detalhes Internos */}
-                    {/* <ActionIcon variant="subtle" color="gray" size="lg">
-                        <IconExternalLink size={20} />
-                    </ActionIcon> */}
+                    {/* NOVO: Botão Excluir */}
+                    <Tooltip label="Excluir Entrega (Apenas se vazia ou > 5 anos)">
+                        <ActionIcon 
+                            variant="subtle" 
+                            color="red" 
+                            size="lg"
+                            loading={deletingId === folder.id} // Spinner na lixeira
+                            onClick={() => handleDeleteFolder(folder)}
+                        >
+                            <IconTrash size={20} />
+                        </ActionIcon>
+                    </Tooltip>
+
                 </Group>
             </Table.Td>
         </Table.Tr>

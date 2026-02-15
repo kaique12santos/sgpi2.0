@@ -225,3 +225,18 @@ Retorna a lista completa de todas as pastas de entrega do sistema para gestão.
   - Dados do Professor (professor_name).
   - Contexto (discipline_name, semester_label).
   - Estatísticas (total_files, pending_files, error_files).
+
+### 16. Gestão Administrativa (Coordenador)
+
+**GET** `/downloads/folder/:folderId`
+Gera e inicia o download de um arquivo ZIP contendo todos os documentos da pasta solicitada.
+- **Fluxo:** Streaming em tempo real (não salva ZIP no servidor).
+- **Conteúdo:** Arquivos do Drive + Links externos (convertidos para `.url`).
+
+**DELETE** `/management/folders/:id`
+Exclui uma pasta de entrega e seus documentos.
+- **Regras de Negócio (Compliance):**
+  1. **Permissão:** Apenas perfil `COORDENADOR`.
+  2. **Retenção Legal:** Só permite exclusão se a pasta tiver mais de **5 anos** (Legislação Educacional).
+  3. **Exceção:** Permite exclusão imediata se a pasta estiver **vazia** (correção de erro operacional).
+- **Resposta de Bloqueio:** `400 Bad Request` com mensagem explicativa da lei.
