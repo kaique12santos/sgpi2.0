@@ -159,3 +159,14 @@ Inicialmente, o design previa gráficos de progresso de alunos e conformidade de
 1. **Remoção de Métricas Fictícias:** Removemos os gráficos de pizza e contagem de "Alunos" do dashboard, pois esses dados não existem no modelo atual.
 2. **Foco em Infraestrutura:** O Dashboard do Coordenador deve exibir métricas de "Saúde do Sistema": Total de Pastas criadas (adoção) e Uso de Disco (custo/limite do Drive).
 3. **Role-Based Views:** O Backend entrega objetos de estatísticas diferentes (`global` vs `pessoal`) dependendo da role, ao invés do Frontend filtrar dados sensíveis.
+
+## [2026-02-15] Correção de Estatísticas e Painel Geral
+**Problema:**
+O painel do coordenador e a lista do professor exibiam "0 arquivos" mesmo em pastas cheias.
+**Causa:**
+A subquery SQL comparava `documents.folder_id` (que é o ID numérico do banco) com `submission_folders.drive_folder_id` (que é a string hash do Google).
+**Solução:**
+Ajustada a query no `SubmissionFolderRepository` para comparar `documents.folder_id = submission_folders.id`.
+
+**Decisão de Arquitetura:**
+Optou-se por criar um método `findAllWithDetails` no Repositório que utiliza `JOIN` com a tabela `users` para entregar o nome do professor diretamente na listagem, evitando múltiplas requisições no Frontend ("N+1 problem").

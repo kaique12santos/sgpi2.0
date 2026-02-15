@@ -11,6 +11,7 @@ import ForgotPassword from '../pages/Auth/ForgotPassword';
 import Profile from '../pages/Profile';
 import UploadPage from '../pages/Professor/UploadPage';
 import MyFoldersPage from '../pages/Professor/MyFoldersPage';
+import CoordenadorPainellPage from '../pages/Coordenador/Painel';
 
 // Componente para proteger rotas privadas
 const Private = ({ children }) => {
@@ -45,6 +46,7 @@ export default function AppRoutes() {
                 <Route path="perfil" element={<Profile />} />
                 <Route path="novo-envio" element={<UploadPage />} />
                 <Route path="meus-envios" element={<MyFoldersPage />} />
+                <Route path="entregas" element={<CoordenadorPainellPage />} />
             </Route>
 
             {/* Qualquer rota desconhecida joga pro Login */}

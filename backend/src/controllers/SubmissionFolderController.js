@@ -78,24 +78,21 @@ class SubmissionFolderController {
         }
     }
 
-    /**
-     * Lista TODAS as pastas (Visão do Coordenador).
-     * Traz o nome do professor (users.name).
+   /**
+     * [COORDENADOR] Lista todas as pastas do sistema.
+     * Rota: GET /folders
      */
-    async findAllWithDetails() {
-        const sql = `
-            SELECT 
-                sf.*, 
-                d.name as discipline_name, 
-                s.label as semester_label,
-                u.name as professor_name  -- O Coordenador precisa ver quem criou!
-            FROM submission_folders sf
-            JOIN disciplines d ON sf.discipline_id = d.id
-            JOIN semesters s ON sf.semester_id = s.id
-            JOIN users u ON sf.user_id = u.id
-            ORDER BY sf.created_at DESC
-        `;
-        return await Database.query(sql);
+    async getAllFolders(req, res) {
+        try {
+            // Chama o repositório que já faz o trabalho pesado
+            const folders = await SubmissionFolderRepository.findAllWithDetails();
+            
+            return res.json(folders);
+            
+        } catch (error) {
+            console.error('Erro ao listar todas as pastas (Admin):', error);
+            return res.status(500).json({ error: 'Erro interno ao buscar pastas.' });
+        }
     }
 }
 

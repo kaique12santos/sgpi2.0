@@ -211,3 +211,17 @@ Retorna os contadores para a tela inicial baseados no perfil do usuário logado.
     "pendingCount": 0
   }
 ```
+
+
+### 15 Painel do Coordenador
+## [2026-02-15]
+
+**GET** `/submission-folders/painel`
+Retorna a lista completa de todas as pastas de entrega do sistema para gestão.
+
+- **Autenticação:** Obrigatória. (Idealmente restrito a role `COORD`).
+- **Resposta:** Array de objetos contendo:
+  - Dados da Pasta (id, title, dates).
+  - Dados do Professor (professor_name).
+  - Contexto (discipline_name, semester_label).
+  - Estatísticas (total_files, pending_files, error_files).

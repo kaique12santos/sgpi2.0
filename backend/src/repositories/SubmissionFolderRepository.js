@@ -110,12 +110,10 @@ class SubmissionFolderRepository {
                 sf.drive_folder_id,
                 d.name as discipline_name,
                 s.label as semester_label,
-                -- Contagem Total de Arquivos
-                (SELECT COUNT(*) FROM documents doc WHERE doc.folder_id = sf.drive_folder_id) as total_files,
-                -- Contagem de Arquivos Pendentes/Processando (para mostrar spinner se precisar)
-                (SELECT COUNT(*) FROM documents doc WHERE doc.folder_id = sf.drive_folder_id AND doc.status IN ('PENDING', 'UPLOADING')) as pending_files,
-                -- Contagem de Erros
-                (SELECT COUNT(*) FROM documents doc WHERE doc.folder_id = sf.drive_folder_id AND doc.status = 'ERROR') as error_files
+                -- CORREÇÃO AQUI TAMBÉM:
+                (SELECT COUNT(*) FROM documents doc WHERE doc.folder_id = sf.id) as total_files,
+                (SELECT COUNT(*) FROM documents doc WHERE doc.folder_id = sf.id AND doc.status IN ('PENDING', 'UPLOADING')) as pending_files,
+                (SELECT COUNT(*) FROM documents doc WHERE doc.folder_id = sf.id AND doc.status = 'ERROR') as error_files
             
             FROM submission_folders sf
             JOIN disciplines d ON sf.discipline_id = d.id
@@ -127,7 +125,7 @@ class SubmissionFolderRepository {
         return await Database.query(sql, [userId]);
     }
 
-    /**
+   /**
      * [COORDENADOR] Lista TODAS as pastas do sistema com estatísticas e nome do professor.
      */
     async findAllWithDetails() {
@@ -137,17 +135,19 @@ class SubmissionFolderRepository {
                 sf.title,
                 sf.created_at,
                 sf.drive_folder_id,
-                u.name as professor_name,   -- <--- AQUI: O diferencial para o Coordenador
+                u.name as professor_name,
                 d.name as discipline_name,
                 s.label as semester_label,
                 
-                -- Estatísticas (Iguais às do Professor)
-                (SELECT COUNT(*) FROM documents doc WHERE doc.folder_id = sf.drive_folder_id) as total_files,
-                (SELECT COUNT(*) FROM documents doc WHERE doc.folder_id = sf.drive_folder_id AND doc.status IN ('PENDING', 'UPLOADING')) as pending_files,
-                (SELECT COUNT(*) FROM documents doc WHERE doc.folder_id = sf.drive_folder_id AND doc.status = 'ERROR') as error_files
+                -- CORREÇÃO AQUI: Usar 'sf.id' em vez de 'sf.drive_folder_id'
+                (SELECT COUNT(*) FROM documents doc WHERE doc.folder_id = sf.id) as total_files,
+                
+                (SELECT COUNT(*) FROM documents doc WHERE doc.folder_id = sf.id AND doc.status IN ('PENDING', 'UPLOADING')) as pending_files,
+                
+                (SELECT COUNT(*) FROM documents doc WHERE doc.folder_id = sf.id AND doc.status = 'ERROR') as error_files
             
             FROM submission_folders sf
-            JOIN users u ON sf.user_id = u.id          -- Join para pegar o nome do professor
+            JOIN users u ON sf.user_id = u.id
             JOIN disciplines d ON sf.discipline_id = d.id
             JOIN semesters s ON sf.semester_id = s.id
             ORDER BY sf.created_at DESC

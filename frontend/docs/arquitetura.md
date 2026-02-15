@@ -75,3 +75,14 @@ O tema foi configurado em `src/theme/index.js` para espelhar a identidade visual
 - **Professor:** Foco em ações operacionais ("Nova Entrega") e feedback de status do Worker (Upload em andamento/Concluído).
 - **Coordenador:** Foco em monitoramento macro (Cards de Infraestrutura).
 - **Integração:** Consome `GET /dashboard/stats` e formata bytes para human-readable (MB, GB) no front.
+
+### 11. Módulo do Coordenador
+## [2026-02-15] 
+**Nova Página:** `Painel.jsx`
+
+**Funcionalidades:**
+- **Listagem Geral:** Exibe todas as entregas do sistema.
+- **Identificação Visual:** Avatar com iniciais do professor e badges coloridas por semestre.
+- **Filtros no Front:** Busca em tempo real por nome do professor, disciplina ou título da entrega.
+- **Paginação:** Implementada paginação visual (10 itens por página) para evitar scroll infinito.
+- **Ações:** Link direto para a pasta raiz no Google Drive.
