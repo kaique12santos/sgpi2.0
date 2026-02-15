@@ -65,6 +65,40 @@ class UserRepository {
         
         return rows.length > 0 ? rows[0] : null;
     }
+
+    /**
+     * Lista todos os usuários do sistema (para o painel ADMIN).
+     * IMPORTANTE: Não retornamos a senha!
+     */
+    async findAll() {
+        const sql = `
+            SELECT id, name, email, role, created_at 
+            FROM users 
+            ORDER BY name ASC
+        `;
+        return await Database.query(sql);
+    }
+
+    /**
+     * Atualiza dados de um usuário específico (Admin editando alguém).
+     */
+    async update(id, { name, email, role }) {
+        const sql = `
+            UPDATE users 
+            SET name = ?, email = ?, role = ? 
+            WHERE id = ?
+        `;
+        await Database.query(sql, [name, email, role, id]);
+        return this.findById(id);
+    }
+
+    /**
+     * Deleta um usuário.
+     */
+    async delete(id) {
+        const sql = `DELETE FROM users WHERE id = ?`;
+        await Database.query(sql, [id]);
+    }
 }
 
 module.exports = new UserRepository();

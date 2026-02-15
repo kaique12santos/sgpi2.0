@@ -40,7 +40,7 @@ export default function MainLayout() {
     const menuItems = user?.role === 'coordenador' 
         ? [
             { label: 'Painel Geral', icon: IconDashboard, path: '/dashboard' },
-            // Aqui troquei IconFiles por IconFolder (exemplo)
+            { label: 'Gerenciar Usuários', icon: IconSettings, path: '/dashboard/usuarios' },
             { label: 'Gerenciar Entregas', icon: IconFolder, path: '/dashboard/entregas' }, 
             { label: 'Meu Perfil', icon: IconSettings, path: '/dashboard/perfil' },
           ]

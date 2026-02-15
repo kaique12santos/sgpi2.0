@@ -227,7 +227,7 @@ Retorna a lista completa de todas as pastas de entrega do sistema para gestão.
   - Estatísticas (total_files, pending_files, error_files).
 
 ### 16. Gestão Administrativa (Coordenador)
-
+## [2026-02-15]
 **GET** `/downloads/folder/:folderId`
 Gera e inicia o download de um arquivo ZIP contendo todos os documentos da pasta solicitada.
 - **Fluxo:** Streaming em tempo real (não salva ZIP no servidor).
@@ -240,3 +240,20 @@ Exclui uma pasta de entrega e seus documentos.
   2. **Retenção Legal:** Só permite exclusão se a pasta tiver mais de **5 anos** (Legislação Educacional).
   3. **Exceção:** Permite exclusão imediata se a pasta estiver **vazia** (correção de erro operacional).
 - **Resposta de Bloqueio:** `400 Bad Request` com mensagem explicativa da lei.
+
+### 17. Administração de Usuários (Coordenador)
+## [2026-02-15]
+**GET** `/admin/users`
+Lista todos os usuários cadastrados no sistema.
+- **Campos:** id, name, email, role, created_at.
+- **Segurança:** Não retorna senhas.
+
+**PUT** `/admin/users/:id`
+Atualiza dados cadastrais e permissões de um usuário.
+- **Body:** `{ "name": "Nome", "email": "novo@email.com", "role": "coordenador" }`
+
+**DELETE** `/admin/users/:id`
+Remove permanentemente uma conta de usuário.
+- **Bloqueios:**
+  - Não permite auto-exclusão (usuário deletar a si mesmo).
+  - Retorna erro se o usuário possuir entregas vinculadas (Constraint de Banco).

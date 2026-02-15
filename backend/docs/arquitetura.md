@@ -89,3 +89,14 @@ O sistema utiliza um padrão de Fila para uploads pesados e geração de links, 
 1. O controlador identifica a `role` do usuário via Banco de Dados (para garantir consistência além do Token).
 2. Executa queries `COUNT` e `SUM` otimizadas.
 3. Não realiza cruzamento de dados complexos para manter a performance da Home alta.
+
+### 13. Organização de Rotas Administrativas
+
+## [2026-02-15] 
+**Decisão:**
+Para evitar conflitos e poluição no `app.js`, as rotas administrativas foram segregadas em arquivos específicos:
+- `admin.routes.js`: Gestão de Pessoas (CRUD Usuários).
+- `management.routes.js`: Gestão de Conteúdo (Delete Pastas/Arquivos).
+- `download.routes.js`: Streaming de Arquivos.
+
+Essa separação facilita a manutenção e permite aplicar middlewares de segurança (ex: `checkRole('coordenador')`) em blocos inteiros de rotas futuramente.

@@ -12,6 +12,7 @@ import Profile from '../pages/Profile';
 import UploadPage from '../pages/Professor/UploadPage';
 import MyFoldersPage from '../pages/Professor/MyFoldersPage';
 import CoordenadorPainellPage from '../pages/Coordenador/Painel';
+import UserManagementPage from '../pages/Coordenador/UserManagementPage';
 
 // Componente para proteger rotas privadas
 const Private = ({ children }) => {
@@ -47,6 +48,7 @@ export default function AppRoutes() {
                 <Route path="novo-envio" element={<UploadPage />} />
                 <Route path="meus-envios" element={<MyFoldersPage />} />
                 <Route path="entregas" element={<CoordenadorPainellPage />} />
+                <Route path="usuarios" element={<UserManagementPage />} />
             </Route>
 
             {/* Qualquer rota desconhecida joga pro Login */}

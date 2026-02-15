@@ -87,8 +87,19 @@ O tema foi configurado em `src/theme/index.js` para espelhar a identidade visual
 - **Paginação:** Implementada paginação visual (10 itens por página) para evitar scroll infinito.
 - **Ações:** Link direto para a pasta raiz no Google Drive.
 
-## [2026-02-15] Painel do Coordenador (Finalização)
+### 12. Painel do Coordenador (Finalização)
+## [2026-02-15] 
 **Features Adicionadas:**
 - **Download em Lote:** Botão para baixar ZIP completo da entrega diretamente da tabela.
 - **Gestão de Exclusão:** Botão de lixeira com confirmação (`@mantine/modals`) e tratamento de erro visual (Toast Vermelho) caso viole a regra dos 5 anos.
 - **Feedback Visual:** Spinners de carregamento individuais por linha (para download e delete) para não travar a interface inteira.
+
+### 13. Painel de Usuários
+## [2026-02-15]
+**Nova Página:** `UserManagementPage.jsx`
+
+**Funcionalidades:**
+- **CRUD Visual:** Tabela com avatares e badges de cargo.
+- **UX de Edição:** Utiliza `modals.open` para formulário de edição sem sair da tela.
+- **UX de Exclusão:** Utiliza `modals.openConfirmModal` com estilo de perigo (vermelho) para evitar acidentes.
+- **Filtros:** Busca em tempo real por nome e email.
