@@ -219,7 +219,7 @@ Retorna os contadores para a tela inicial baseados no perfil do usuário logado.
 **GET** `/submission-folders/painel`
 Retorna a lista completa de todas as pastas de entrega do sistema para gestão.
 
-- **Autenticação:** Obrigatória. (Idealmente restrito a role `COORD`).
+- **Autenticação:** Obrigatória. (Idealmente restrito a role `coordenador`).
 - **Resposta:** Array de objetos contendo:
   - Dados da Pasta (id, title, dates).
   - Dados do Professor (professor_name).
