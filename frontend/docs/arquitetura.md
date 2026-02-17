@@ -58,7 +58,7 @@ O tema foi configurado em `src/theme/index.js` para espelhar a identidade visual
 
 
 ### 9. Módulo de Upload e Validação
-## [2026-02-10]
+## [10/02/2026]
 **Componentes:** `UploadPage.jsx` e Modal de Edição em `MyFoldersPage.jsx`.
 
 **Regras de Negócio Implementadas:**
@@ -67,7 +67,7 @@ O tema foi configurado em `src/theme/index.js` para espelhar a identidade visual
 3. **Upload Unificado:** Tanto a criação quanto a edição utilizam `FormData` e delegam o processamento pesado para o Backend.
 
 ### 10. Dashboard Dinâmico
-## [2026-02-11] 
+## [11/02/2026] 
 **Componente:** `DashboardPage.jsx`
 
 **Lógica de Renderização:**
@@ -77,7 +77,7 @@ O tema foi configurado em `src/theme/index.js` para espelhar a identidade visual
 - **Integração:** Consome `GET /dashboard/stats` e formata bytes para human-readable (MB, GB) no front.
 
 ### 11. Módulo do Coordenador
-## [2026-02-15] 
+## [15/02/2026] 
 **Nova Página:** `Painel.jsx`
 
 **Funcionalidades:**
@@ -88,14 +88,14 @@ O tema foi configurado em `src/theme/index.js` para espelhar a identidade visual
 - **Ações:** Link direto para a pasta raiz no Google Drive.
 
 ### 12. Painel do Coordenador (Finalização)
-## [2026-02-15] 
+## [15/02/2026] 
 **Features Adicionadas:**
 - **Download em Lote:** Botão para baixar ZIP completo da entrega diretamente da tabela.
 - **Gestão de Exclusão:** Botão de lixeira com confirmação (`@mantine/modals`) e tratamento de erro visual (Toast Vermelho) caso viole a regra dos 5 anos.
 - **Feedback Visual:** Spinners de carregamento individuais por linha (para download e delete) para não travar a interface inteira.
 
 ### 13. Painel de Usuários
-## [2026-02-15]
+## [15/02/2026]
 **Nova Página:** `UserManagementPage.jsx`
 
 **Funcionalidades:**
@@ -103,3 +103,13 @@ O tema foi configurado em `src/theme/index.js` para espelhar a identidade visual
 - **UX de Edição:** Utiliza `modals.open` para formulário de edição sem sair da tela.
 - **UX de Exclusão:** Utiliza `modals.openConfirmModal` com estilo de perigo (vermelho) para evitar acidentes.
 - **Filtros:** Busca em tempo real por nome e email.
+
+### 14. Atualização do Dashboard
+## [17/02/2026] 
+**Funcionalidade: Avisos do Sistema**
+- O `DashboardPage` agora realiza um *fetch* paralelo (`Promise.all` ou sequencial) para buscar estatísticas e o `/system/notice`.
+- **Renderização Condicional:**
+  - **Professor:** Vê o alerta apenas se `is_active === true`.
+  - **Coordenador:** Vê o alerta (ativo ou inativo) e possui um botão de ação "Editar Aviso Global".
+- **Componentes:**
+  - `EditNoticeForm`: Formulário encapsulado em Modal (Mantine) para edição rápida do conteúdo e tipo do aviso.

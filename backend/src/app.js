@@ -14,6 +14,7 @@ const setupRoutes = require('./routes/setupRoutes');
 const submissionRoutes = require('./routes/submissionRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const systemRoutes = require('./routes/systemRoutes');
 // Importação das Rotas (Futuro)
 // const authRoutes = require('./routes/authRoutes');
 
@@ -70,6 +71,7 @@ class App {
         this.app.use('/api/submission-folders', submissionRoutes);
         this.app.use('/api/dashboard', dashboardRoutes);
         this.app.use('/api/admin', adminRoutes);
+        this.app.use('/api/system', systemRoutes);
 
 
     }

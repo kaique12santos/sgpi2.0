@@ -142,7 +142,7 @@
   - Alterado para listar a tabela `disciplines` completa em vez de `submission_folders`.
   - Motivo: Permitir que o professor selecione matérias mesmo que ainda não existam pastas criadas para elas no semestre atual (Lógica *Lazy Creation*).
 
-## [2026-02-10] Estratégia de Sanitização de Arquivos e Upload
+## [10/02/2026] Estratégia de Sanitização de Arquivos e Upload
 **Contexto:**
 Houve problemas recorrentes com arquivos contendo caracteres especiais (acentos, cedilha, emojis) corrompendo nomes no Banco de Dados ou no Google Drive, gerando erros de codificação na API. Tentativas de sanitização puramente no Backend resultaram em duplicidade de lógica e persistência de erros em alguns fluxos.
 
@@ -151,7 +151,7 @@ Houve problemas recorrentes com arquivos contendo caracteres especiais (acentos,
 2. **Fallback no Backend:** Mantivemos a função `sanitizeFilename` no Worker e Controllers como segurança redundante, caso a validação do front seja burlada, mas a "fonte da verdade" é a prevenção no client-side.
 3. **Links como Arquivos:** Links externos (YouTube/GitHub) são convertidos em arquivos `.html` (redirecionamento) no Frontend antes do envio, permitindo que o sistema os trate como qualquer outro arquivo no fluxo do Google Drive.
 
-## [2026-02-11] Escopo do Dashboard do Coordenador (MVP)
+## [11/02/2026] Escopo do Dashboard do Coordenador (MVP)
 **Contexto:**
 Inicialmente, o design previa gráficos de progresso de alunos e conformidade de tarefas. Porém, na versão 1.0 (MVP), o sistema foca no recebimento e armazenamento seguro dos arquivos, sem gestão granular de tarefas/prazos de alunos individuais.
 
@@ -160,7 +160,7 @@ Inicialmente, o design previa gráficos de progresso de alunos e conformidade de
 2. **Foco em Infraestrutura:** O Dashboard do Coordenador deve exibir métricas de "Saúde do Sistema": Total de Pastas criadas (adoção) e Uso de Disco (custo/limite do Drive).
 3. **Role-Based Views:** O Backend entrega objetos de estatísticas diferentes (`global` vs `pessoal`) dependendo da role, ao invés do Frontend filtrar dados sensíveis.
 
-## [2026-02-15] Correção de Estatísticas e Painel Geral
+## [15/02/2026] Correção de Estatísticas e Painel Geral
 **Problema:**
 O painel do coordenador e a lista do professor exibiam "0 arquivos" mesmo em pastas cheias.
 **Causa:**
@@ -171,7 +171,7 @@ Ajustada a query no `SubmissionFolderRepository` para comparar `documents.folder
 **Decisão de Arquitetura:**
 Optou-se por criar um método `findAllWithDetails` no Repositório que utiliza `JOIN` com a tabela `users` para entregar o nome do professor diretamente na listagem, evitando múltiplas requisições no Frontend ("N+1 problem").
 
-## [2026-02-15] Política de Exclusão de Entregas
+## [15/02/2026] Política de Exclusão de Entregas
 **Contexto:**
 O Coordenador precisa de ferramentas para limpar o sistema, mas a instituição deve obedecer à legislação de guarda de documentos acadêmicos pelo periodo que o aluno tem para terminar os cursos de 5 anos.
 
@@ -182,7 +182,7 @@ Implementado um "Soft Block" no Backend:
 - Se `< 5 anos` e estiver vazia: **Permite** (entende-se como erro de criação).
 - Se `> 5 anos`: **Permite** (expirou o prazo legal).
 
-## [2026-02-17] Acessibilidade Global (UserWay)
+## [17/02/2026] Acessibilidade Global (UserWay)
 **Contexto:**
 O sistema SGPI precisa atender a requisitos de inclusão digital (contraste, leitura de tela, aumento de fonte), garantindo acesso a usuários com deficiência visual ou motora.
 
@@ -193,3 +193,13 @@ Optou-se pela integração do widget **UserWay** (Versão Gratuita) via CDN glob
 1.  **Performance:** A injeção direta no `index.html` garante que a ferramenta de acessibilidade carregue independentemente da renderização do React (Single Page Application).
 2.  **Cobertura:** O widget flutua sobre todas as rotas do sistema sem necessidade de configuração por página.
 3.  **Configuração (Workaround):** Devido às limitações do painel gratuito da UserWay, a posição do widget foi forçada via código usando a variável global `_userway_config` no `head` do HTML, fixando-o na parte inferior da tela para não obstruir a navegação.
+
+## [17/02/2026] Avisos Dinâmicos no Dashboard
+**Contexto:**
+O dashboard possuía um aviso estático ("Verifique o calendário..."). O Coordenador necessitava de um canal direto para comunicar prazos, manutenções ou alertas urgentes aos professores sem depender de deploy.
+
+**Decisão:**
+Implementado um sistema de **Avisos Dinâmicos (Database-Driven)**.
+- O aviso é lido de uma tabela SQL a cada carregamento do Dashboard.
+- O Coordenador possui permissão de escrita via Modal no próprio Dashboard.
+- Utiliza-se tipos semânticos (`info`, `warning`, `error`) para alterar a cor do alerta visualmente (UX).

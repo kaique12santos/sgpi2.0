@@ -46,6 +46,7 @@ export default function MainLayout() {
           ]
         : [
             // Aqui troquei IconFiles por IconFileText (exemplo)
+            { label: 'Painel Geral', icon: IconDashboard, path: '/dashboard' },
             { label: 'Meus Envios', icon: IconFileText, path: '/dashboard/meus-envios' },
             { label: 'Novo Envio', icon: IconUpload, path: '/dashboard/novo-envio' },
             { label: 'Meu Perfil', icon: IconSettings, path: '/dashboard/perfil' },

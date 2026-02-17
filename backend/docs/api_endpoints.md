@@ -182,7 +182,7 @@ Remove a pasta e todos os seus documentos (Cascade). No Drive, move para a lixei
 - **Retorno:** `{ "success": true }`
 
 ### 13. Endpoints de Arquivos
-## [2026-02-10]
+## [10/02/2026]
 
 **POST** `/uploads/add-files/:id`
 Adiciona novos arquivos a uma pasta de entrega existente (Fluxo de Edição).
@@ -195,7 +195,7 @@ Adiciona novos arquivos a uma pasta de entrega existente (Fluxo de Edição).
   - Retorna `200 OK` imediatamente para liberar a UI.
 
 ### 14 Dashboard e Estatísticas
-## [2026-02-11] 
+## [11/02/2026] 
 
 **GET** `/dashboard/stats`
 Retorna os contadores para a tela inicial baseados no perfil do usuário logado.
@@ -214,7 +214,7 @@ Retorna os contadores para a tela inicial baseados no perfil do usuário logado.
 
 
 ### 15 Painel do Coordenador
-## [2026-02-15]
+## [15/02/2026]
 
 **GET** `/submission-folders/painel`
 Retorna a lista completa de todas as pastas de entrega do sistema para gestão.
@@ -227,7 +227,7 @@ Retorna a lista completa de todas as pastas de entrega do sistema para gestão.
   - Estatísticas (total_files, pending_files, error_files).
 
 ### 16. Gestão Administrativa (Coordenador)
-## [2026-02-15]
+## [15/02/2026]
 **GET** `/downloads/folder/:folderId`
 Gera e inicia o download de um arquivo ZIP contendo todos os documentos da pasta solicitada.
 - **Fluxo:** Streaming em tempo real (não salva ZIP no servidor).
@@ -242,7 +242,7 @@ Exclui uma pasta de entrega e seus documentos.
 - **Resposta de Bloqueio:** `400 Bad Request` com mensagem explicativa da lei.
 
 ### 17. Administração de Usuários (Coordenador)
-## [2026-02-15]
+## [15/02/2026]
 **GET** `/admin/users`
 Lista todos os usuários cadastrados no sistema.
 - **Campos:** id, name, email, role, created_at.
@@ -257,3 +257,15 @@ Remove permanentemente uma conta de usuário.
 - **Bloqueios:**
   - Não permite auto-exclusão (usuário deletar a si mesmo).
   - Retorna erro se o usuário possuir entregas vinculadas (Constraint de Banco).
+
+### Sistema e Avisos Globais
+## [17/02/2026]
+**GET** `/system/notice`
+Retorna a mensagem de aviso global configurada no sistema.
+- **Autenticação:** Obrigatória (Qualquer perfil).
+- **Resposta:** Objeto contendo `content` (texto), `type` (info, warning, error) e `is_active` (boolean).
+
+**PUT** `/system/notice`
+Atualiza o aviso global do sistema.
+- **Autenticação:** Obrigatória (Apenas `COORDENADOR`).
+- **Body:** `{ "content": "Texto do aviso", "type": "warning", "is_active": true }`

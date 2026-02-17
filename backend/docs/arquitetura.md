@@ -66,7 +66,7 @@ Serviços temporizados que rodam independentemente de requisições do usuário.
 
 
 ### 11. Fluxo de Processamento Assíncrono (UploadQueueWorker)
-## [2026-02-10]
+## [10/02/2026]
 
 O sistema utiliza um padrão de Fila para uploads pesados e geração de links, evitando travar a requisição do usuário.
 
@@ -81,7 +81,7 @@ O sistema utiliza um padrão de Fila para uploads pesados e geração de links, 
 
 #### 12. Atualize com o novo controlador.
 
-## [2026-02-11] Módulo Dashboard
+## [11/02/2026] Módulo Dashboard
 **Responsabilidade:** Agregar dados para visualização rápida sem processamento pesado.
 **Componente:** `DashboardController`.
 
@@ -92,7 +92,7 @@ O sistema utiliza um padrão de Fila para uploads pesados e geração de links, 
 
 ### 13. Organização de Rotas Administrativas
 
-## [2026-02-15] 
+## [15/02/2026] 
 **Decisão:**
 Para evitar conflitos e poluição no `app.js`, as rotas administrativas foram segregadas em arquivos específicos:
 - `admin.routes.js`: Gestão de Pessoas (CRUD Usuários).
@@ -100,3 +100,13 @@ Para evitar conflitos e poluição no `app.js`, as rotas administrativas foram s
 - `download.routes.js`: Streaming de Arquivos.
 
 Essa separação facilita a manutenção e permite aplicar middlewares de segurança (ex: `checkRole('coordenador')`) em blocos inteiros de rotas futuramente.
+
+### 14. Módulo de Sistema (Avisos)
+
+## [17/02/2026] 
+**Banco de Dados:**
+- Criada tabela `system_messages` (Singleton Pattern - apenas 1 registro com ID 1) para armazenar configurações globais dinâmicas.
+
+**Componentes:**
+- **SystemRepository:** Responsável por buscar/atualizar o registro único de aviso.
+- **SystemController:** Expõe endpoints para leitura (Dashboard) e escrita (Gestão do Coordenador).
