@@ -181,3 +181,15 @@ Implementado um "Soft Block" no Backend:
 - Se `< 5 anos` e contiver arquivos: **Bloqueia** e retorna erro informativo.
 - Se `< 5 anos` e estiver vazia: **Permite** (entende-se como erro de criação).
 - Se `> 5 anos`: **Permite** (expirou o prazo legal).
+
+## [2026-02-17] Acessibilidade Global (UserWay)
+**Contexto:**
+O sistema SGPI precisa atender a requisitos de inclusão digital (contraste, leitura de tela, aumento de fonte), garantindo acesso a usuários com deficiência visual ou motora.
+
+**Decisão:**
+Optou-se pela integração do widget **UserWay** (Versão Gratuita) via CDN global.
+
+**Justificativa Técnica:**
+1.  **Performance:** A injeção direta no `index.html` garante que a ferramenta de acessibilidade carregue independentemente da renderização do React (Single Page Application).
+2.  **Cobertura:** O widget flutua sobre todas as rotas do sistema sem necessidade de configuração por página.
+3.  **Configuração (Workaround):** Devido às limitações do painel gratuito da UserWay, a posição do widget foi forçada via código usando a variável global `_userway_config` no `head` do HTML, fixando-o na parte inferior da tela para não obstruir a navegação.
