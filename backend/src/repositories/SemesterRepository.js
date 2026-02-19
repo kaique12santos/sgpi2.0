@@ -7,7 +7,6 @@ const Database = require('../config/Database.js');
  */
 class SemesterRepository {
    
-    // Busca um semestre pelo seu label
     async findByLabel(label) {
         const sql = `SELECT * FROM semesters WHERE label = ?`;
         const rows = await Database.query(sql, [label]);
@@ -22,10 +21,9 @@ class SemesterRepository {
      * @returns {Promise<number>} ID do semestre criado
      */
     async create({ label, drive_root_id }) {
-        // 1. Desativa todos os outros antes de criar o novo
+
         await Database.query(`UPDATE semesters SET is_active = 0`);
 
-        // 2. Cria o novo já como ativo
         const sql = `
             INSERT INTO semesters (label, drive_root_id, is_active)
             VALUES (?, ?, 1)

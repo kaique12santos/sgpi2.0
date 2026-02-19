@@ -35,8 +35,6 @@ export default function MainLayout() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Definição dos itens do menu baseados no cargo
-    // Você pode adicionar mais ícones/rotas aqui facilmente
     const menuItems = user?.role === 'coordenador' 
         ? [
             { label: 'Painel Geral', icon: IconDashboard, path: '/dashboard' },
@@ -45,7 +43,6 @@ export default function MainLayout() {
             { label: 'Meu Perfil', icon: IconSettings, path: '/dashboard/perfil' },
           ]
         : [
-            // Aqui troquei IconFiles por IconFileText (exemplo)
             { label: 'Painel Geral', icon: IconDashboard, path: '/dashboard' },
             { label: 'Meus Envios', icon: IconFileText, path: '/dashboard/meus-envios' },
             { label: 'Novo Envio', icon: IconUpload, path: '/dashboard/novo-envio' },
@@ -137,11 +134,11 @@ export default function MainLayout() {
                                     alignItems: 'center',
                                     width: '100%',
                                     padding: '12px 16px',
-                                    borderRadius: '0 8px 8px 0', // Arredondado só na direita
-                                    backgroundColor: isActive ? '#fff5f5' : 'transparent', // Fundo vermelho bem claro se ativo
+                                    borderRadius: '0 8px 8px 0', 
+                                    backgroundColor: isActive ? '#fff5f5' : 'transparent', 
                                     color: isActive ? '#970000' : '#495057',
                                     fontWeight: isActive ? 600 : 400,
-                                    borderLeft: isActive ? '4px solid #970000' : '4px solid transparent', // Borda vermelha na esquerda
+                                    borderLeft: isActive ? '4px solid #970000' : '4px solid transparent',
                                     transition: 'all 0.2s'
                                 }}
                             >

@@ -4,8 +4,7 @@ const cron = require('node-cron');
 
 class CleanupService {
     constructor() {
-        // AJUSTE CRÍTICO: Caminho relativo da pasta uploads
-        // Sai de services (..), sai de src (..), entra em uploads
+
         this.uploadDir = path.join(__dirname, '../../uploads');
         
         // Tempo de vida do arquivo: 1 hora (em milissegundos)

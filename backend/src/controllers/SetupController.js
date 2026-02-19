@@ -23,64 +23,53 @@ class SetupController {
      * para evitar execuções acidentais.
      */
     async createSemesterFolders(req, res) {
-        // ID REAL da pasta SGPI_ACADEMIC (sem o ?hl=pt-br)
-        const ROOT_FOLDER_ID = '14qPDNB_-r2_jwcVZegJQ-aD4SsqFACtm'; 
+
+        const ROOT_FOLDER_ID = '14qPDNB_-r2_jwcVZegJQ-aD4SsqFACtm';
         const SEMESTER_NAME = '2099_2'; // Semestre de teste
 
         try {
             console.log(` Iniciando criação de pastas para ${SEMESTER_NAME}...`);
 
-            // 1. CRIAR PASTA DO SEMESTRE
             const semesterResult = await GoogleDriveService.createFolder(SEMESTER_NAME, ROOT_FOLDER_ID);
-            
-            // --- CORREÇÃO AQUI ---
-            // Verifica se retornou um objeto ou direto a string ID
-            const semesterFolderId = semesterResult.id || semesterResult; 
-            
+            const semesterFolderId = semesterResult.id || semesterResult;
+
             console.log(` Pasta do semestre criada com ID: ${semesterFolderId}`);
 
-            // 2. BUSCAR DISCIPLINAS
             const disciplines = await Database.query("SELECT * FROM disciplines");
             const results = [];
 
-            // 3. LOOP
             for (const discipline of disciplines) {
-                // Cria a pasta da disciplina DENTRO da pasta do semestre
-                const disciplineResult = await GoogleDriveService.createFolder(discipline.name, semesterFolderId);
-                
-                // --- CORREÇÃO AQUI TAMBÉM ---
-                const driveFolderId = disciplineResult.id || disciplineResult;
 
-                // 4. INSERIR NO BANCO
+                const disciplineResult = await GoogleDriveService.createFolder(discipline.name, semesterFolderId);
+                const driveFolderId = disciplineResult.id || disciplineResult;
                 const sqlInsert = `
                     INSERT INTO submission_folders 
                     (title, user_id, semester_id, discipline_id, drive_folder_id)
                     VALUES (?, ?, ?, ?, ?)
                 `;
 
-                // Garanta que os IDs (1, 1) existam nas tabelas users e semesters
                 await Database.query(sqlInsert, [
-                    `Envios - ${discipline.name}`, 
-                    1, // ID do Professor (User)
-                    1, // ID do Semestre (Semester)
-                    discipline.id, 
-                    driveFolderId // <--- ID STRING CORRETO
+                    `Envios - ${discipline.name}`,
+                    1,
+                    1,
+                    discipline.id,
+                    driveFolderId
                 ]);
 
                 results.push({ discipline: discipline.name, driveId: driveFolderId });
                 console.log(`  -> Pasta criada: ${discipline.name} (${driveFolderId})`);
             }
 
-            return res.json({ 
-                message: 'Estrutura criada com sucesso!', 
-                foldersCreated: results 
+            return res.json({
+                message: 'Estrutura criada com sucesso!',
+                foldersCreated: results
             });
 
         } catch (error) {
             console.error(error);
             return res.status(500).json({ error: 'Erro ao criar estrutura de pastas.' });
         }
-    
+
     }
 }
 

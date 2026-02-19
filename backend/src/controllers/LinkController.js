@@ -21,12 +21,11 @@ class LinkController {
                 return res.status(400).json({ error: 'Pasta, Título e URL são obrigatórios.' });
             }
 
-            // Validação simples de URL
             if (!url.startsWith('http')) {
                 return res.status(400).json({ error: 'A URL deve começar com http:// ou https://' });
             }
 
-            // Garante que o nome termine com extensão de atalho para organização
+          
             const fileName = title.endsWith('.url') ? title : `${title}.url`;
 
             const docId = await DocumentRepository.createLink({

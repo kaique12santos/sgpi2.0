@@ -22,15 +22,13 @@ export default function CoordinatorPanelPage() {
 
     const [deletingId, setDeletingId] = useState(null);
     
-    // Paginação (opcional, mas bom ter preparado)
     const [activePage, setActivePage] = useState(1);
     const itemsPerPage = 10;
 
-    // Carregar dados
     useEffect(() => {
         async function loadFolders() {
             try {
-                // Chama a rota nova que criamos no Backend
+    
                 const response = await api.get('/submission-folders/painel');
                 setFolders(response.data);
             } catch (error) {
@@ -48,7 +46,7 @@ export default function CoordinatorPanelPage() {
     }, []);
 
    const handleDeleteFolder = (folder) => {
-        // Abre o modal elegante do Mantine
+    
         modals.openConfirmModal({
             title: <Text fw={700}>Excluir Entrega Permanente</Text>,
             centered: true,
@@ -62,16 +60,14 @@ export default function CoordinatorPanelPage() {
                 </Text>
             ),
             labels: { confirm: 'Sim, excluir pasta', cancel: 'Cancelar' },
-            confirmProps: { color: 'red' }, // Botão vermelho para perigo
+            confirmProps: { color: 'red' },
             onConfirm: async () => {
-                // A lógica de exclusão vem para cá (callback do Confirmar)
+                
                 try {
-                    setDeletingId(folder.id); // Ativa spinner na lixeira da tabela
+                    setDeletingId(folder.id);
 
-                    // Chama a rota de DELETE
                     await api.delete(`/management/folders/${folder.id}`);
 
-                    // Sucesso: Remove da lista visualmente
                     setFolders((current) => current.filter((f) => f.id !== folder.id));
 
                     notifications.show({
@@ -102,7 +98,7 @@ export default function CoordinatorPanelPage() {
 
     const handleDownloadZip = async (folderId, folderTitle) => {
         try {
-            setDownloadingId(folderId); // Ativa spinner neste botão
+            setDownloadingId(folderId); 
             
             notifications.show({ 
                 id: 'download-load', 
@@ -113,17 +109,14 @@ export default function CoordinatorPanelPage() {
                 withCloseButton: false 
             });
 
-            // Chama a API pedindo o arquivo (responseType: 'blob' é essencial!)
             const response = await api.get(`/downloads/folder/${folderId}`, {
                 responseType: 'blob' 
             });
 
-            // Cria um link temporário no navegador para forçar o download
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
             
-            // Define o nome do arquivo (Sanitiza o título para não quebrar)
             const safeName = folderTitle.replace(/[^a-z0-9]/gi, '_');
             link.setAttribute('download', `${safeName}.zip`);
             

@@ -4,6 +4,12 @@ const SubmissionFolderRepository = require('../repositories/SubmissionFolderRepo
 const DriveService = require('./googleDriveService');
 const {sanitizeFilename} = require('../utils/stringUtils')
 
+/**
+ * UploadQueueWorker é responsável por processar a fila de uploads de forma sequencial.
+ * Ele é acionado sempre que um novo upload é adicionado à fila ou quando o servidor inicia.
+ * O worker pega o próximo item pendente, tenta fazer o upload para o Google Drive, e atualiza o status no banco.
+ * Em caso de falha, ele marca o item como 'ERROR' e continua para o próximo, garantindo que a fila não trave.
+ */
 class UploadQueueWorker {
     constructor() {
         this.isProcessing = false;
@@ -19,11 +25,9 @@ class UploadQueueWorker {
         
         let doc = null;
 
-        
         try {
             console.log('🔄 [Worker] Verificando fila de uploads...');
             
-            // 1. Pega o próximo item da fila
             doc = await DocumentRepository.findNextPending();
             
             if (!doc) {
@@ -34,11 +38,8 @@ class UploadQueueWorker {
 
             console.log(`🚀 [Worker] Processando arquivo ID ${doc.id}: ${doc.original_name}`);
 
-            // Atualiza para UPLOADING
             await DocumentRepository.updateStatus(doc.id, 'UPLOADING');
 
-            // 2. Descobre a pasta do Drive onde deve salvar
-            // Precisamos buscar o drive_folder_id da pasta pai (SubmissionFolder)
             const folderInfo = await SubmissionFolderRepository.findById(doc.folder_id);
             
             if (!folderInfo || !folderInfo.drive_folder_id) {
@@ -46,7 +47,6 @@ class UploadQueueWorker {
             }
 
             const cleanName = sanitizeFilename(doc.original_name);
-            // 3. Realiza o Upload para o Google Drive
             const driveFile = await DriveService.uploadFile(
                 doc.local_path,
                 cleanName,
@@ -55,8 +55,6 @@ class UploadQueueWorker {
             );
             console.log('📦 [Worker] Resposta do Drive:', driveFile);
             
-            // --- CORREÇÃO DE LINKS (FALLBACK) ---
-            // Se a API não retornou o link, montamos manualmente usando o ID
             if (!driveFile.webViewLink && driveFile.id) {
                 driveFile.webViewLink = `https://drive.google.com/file/d/${driveFile.id}/view?usp=drivesdk`;
             }
@@ -99,17 +97,14 @@ class UploadQueueWorker {
                 externalLink: extractedLink 
             };
 
-            // 4. Sucesso! Atualiza banco e deleta arquivo local
             await DocumentRepository.updateStatus(doc.id, 'COMPLETED', uploadData);
             
-            // Remove o arquivo da pasta temporária 'uploads/'
             if (fs.existsSync(doc.local_path)) {
                 fs.unlinkSync(doc.local_path);
             }
 
             console.log(`✨ [Worker] Upload concluído: ${doc.original_name}`);
 
-            // Chama a si mesmo para processar o próximo imediatamente
             this.isProcessing = false;
             this.processQueue();
 
@@ -121,7 +116,6 @@ class UploadQueueWorker {
             }
             
             this.isProcessing = false;
-            // Tenta o próximo mesmo se este falhou
             this.processQueue();
         }
     }

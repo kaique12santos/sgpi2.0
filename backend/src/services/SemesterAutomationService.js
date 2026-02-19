@@ -40,29 +40,25 @@ class SemesterAutomationService {
         } else if (dataFormatada === this.TRANSICAO_2) {
             novoLabel = `${ano}_2`;
         } else {
-            // Não é dia de mudança
             return;
         }
 
         console.log(`🔄 [AutoSemester] Data de corte detectada! Preparando: ${novoLabel}`);
 
         try {
-            // 1. Verifica se já existe para não duplicar
+
             const existe = await SemesterRepository.findByLabel(novoLabel);
             if (existe) {
                 console.log(`⚠️ [AutoSemester] O semestre ${novoLabel} já existe. Ignorando.`);
                 return;
             }
 
-            // 2. Cria a pasta no Google Drive
-            // Pega o ID da pasta "Mãe" (ACADEMIC_ROOT) do .env
             const parentId = process.env.DRIVE_ID_ACADEMIC;
             if (!parentId) throw new Error('DRIVE_ID_ACADEMIC não configurado no .env');
 
             console.log(`📂 [AutoSemester] Criando pasta no Drive...`);
             const folder = await DriveService.createFolder(novoLabel, parentId);
 
-            // 3. Salva no Banco e torna Ativo
             await SemesterRepository.create({
                 label: novoLabel,
                 drive_root_id: folder.id

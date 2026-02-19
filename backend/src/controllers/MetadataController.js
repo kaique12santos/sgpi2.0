@@ -11,7 +11,6 @@ class MetadataController {
      */
     async listDisciplines(req, res) {
         try {
-            // Retorna ID e Nome, ordenado pelo nível (semestre do curso)
             const sql = 'SELECT id, name, course_level FROM disciplines ORDER BY course_level, name';
             const rows = await Database.query(sql);
             res.json({ success: true, disciplines: rows });

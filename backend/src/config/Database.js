@@ -22,12 +22,11 @@ class Database {
     async getConnection() {
         return await this.pool.getConnection();
     }
-    
+
     async query(sql, params) {
         const [rows] = await this.pool.execute(sql, params);
         return rows;
     }
 }
 
-// Exporta uma instância única (Singleton)
 module.exports = new Database();

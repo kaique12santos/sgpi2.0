@@ -242,21 +242,18 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({});
     
-    // Novo estado para o aviso
     const [systemNotice, setSystemNotice] = useState(null);
 
-    // Pega usuário do localStorage
     const user = JSON.parse(localStorage.getItem('sgpi_user') || '{}');
     const userRole = user.role || 'professor';
 
     useEffect(() => {
         async function loadData() {
             try {
-                // 1. Carrega Estatísticas
+                
                 const statsResponse = await api.get('/dashboard/stats');
                 setStats(statsResponse.data);
 
-                // 2. Carrega Aviso Global
                 const noticeResponse = await api.get('/system/notice');
                 setSystemNotice(noticeResponse.data);
 

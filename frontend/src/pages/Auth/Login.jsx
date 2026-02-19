@@ -32,7 +32,6 @@ export default function Login() {
         }
     }, [signed, navigate])
 
-    // Hook do Mantine para gerenciar formulário (validação fácil)
     const form = useForm({
         initialValues: {
             email: '',
@@ -55,7 +54,6 @@ export default function Login() {
                 message: 'Login realizado com sucesso.',
                 color: 'green',
             });
-            // O redirecionamento acontecerá automaticamente no App.jsx quando "user" mudar
             navigate('/dashboard');
         }
     };
@@ -66,7 +64,7 @@ export default function Login() {
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center',
-            backgroundColor: '#f1f3f5' // Fundo cinza suave
+            backgroundColor: '#f1f3f5' 
         }}>
             <Container size={420} p={0}>
                 <Paper shadow="xl" radius="lg" style={{ overflow: 'hidden' }}>
@@ -99,7 +97,6 @@ export default function Login() {
                                 placeholder="nome@fatec.sp.gov.br" 
                                 required 
                                 radius="md"
-                                // Estilizando o input para parecer o da foto (fundo azulado/cinza)
                                 styles={{ input: { backgroundColor: '#f8f9fa' } }} 
                                 {...form.getInputProps('email')}
                             />

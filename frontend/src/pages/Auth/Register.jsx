@@ -17,7 +17,6 @@ export default function Register() {
     const [loading, setLoading] = useState(false);
     const [userEmail, setUserEmail] = useState('');
 
-    // Formulário de Cadastro
     const form = useForm({
         initialValues: { name: '', email: '', password: '', confirmPassword: '' },
         validate: {
@@ -28,12 +27,10 @@ export default function Register() {
         },
     });
 
-    // Enviar Cadastro
     const handleRegister = async (values) => {
         setLoading(true);
         try {
-            // O backend agora retorna 200 (se atualizou pendente) ou 201 (se criou novo)
-            // Ambos significam SUCESSO para nós.
+
             const response = await api.post('/auth/register', {
                 name: values.name,
                 email: values.email,
@@ -41,7 +38,6 @@ export default function Register() {
                 role: 'professor'
             });
             
-            // Força salvar o email no estado para usar na validação
             setUserEmail(values.email);
             
             notifications.show({ 
@@ -50,7 +46,6 @@ export default function Register() {
                 color: 'blue' 
             });
             
-            // PULA PARA A ETAPA 2 (Digitar Token)
             setActive(1); 
 
         } catch (error) {

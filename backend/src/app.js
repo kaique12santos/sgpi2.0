@@ -15,8 +15,6 @@ const submissionRoutes = require('./routes/submissionRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const systemRoutes = require('./routes/systemRoutes');
-// Importação das Rotas (Futuro)
-// const authRoutes = require('./routes/authRoutes');
 
 /**
  * Classe principal da Aplicação Express.
@@ -42,7 +40,6 @@ class App {
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true }));
 
-        // Pasta estática para arquivos públicos (se necessário)
         this.app.use('/public', express.static(path.resolve(__dirname, '..', 'public')));
     }
 

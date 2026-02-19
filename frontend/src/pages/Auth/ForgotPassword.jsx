@@ -15,7 +15,7 @@ export default function ForgotPassword() {
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState('');
 
-    // Passo 1: Enviar Email
+    
     const handleSendEmail = async () => {
         if (!/^\S+@\S+$/.test(email)) return notifications.show({ message: 'Email inválido', color: 'red' });
         
@@ -31,7 +31,6 @@ export default function ForgotPassword() {
         }
     };
 
-    // Passo 2: Resetar Senha
     const formReset = useForm({
         initialValues: { code: '', newPassword: '' },
         validate: {

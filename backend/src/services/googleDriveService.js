@@ -2,32 +2,32 @@ const fs = require('fs');
 const { google } = require('googleapis');
 const path = require('path');
 
-// 1. FORÇA O CARREGAMENTO DO .ENV IMEDIATAMENTE
 require('dotenv').config();
 
+/**
+ * Serviço para interagir com o Google Drive usando a API oficial.
+ * Responsável por criar pastas, fazer upload de arquivos, deletar arquivos, etc.
+ * Utiliza OAuth2 para autenticação e suporta refresh automático do token.
+ */
 class DriveService {
     constructor() {
-        // 2. VERIFICAÇÃO DE SEGURANÇA (Debug)
-        // Se alguma variável estiver faltando, ele avisa e para o servidor agora.
+
         if (!process.env.GOOGLE_CLIENT_ID) throw new Error('❌ ERRO .ENV: GOOGLE_CLIENT_ID não encontrado.');
         if (!process.env.GOOGLE_CLIENT_SECRET) throw new Error('❌ ERRO .ENV: GOOGLE_CLIENT_SECRET não encontrado.');
         if (!process.env.GOOGLE_REFRESH_TOKEN) throw new Error('❌ ERRO .ENV: GOOGLE_REFRESH_TOKEN não encontrado.');
 
         console.log('🔑 Iniciando Serviço do Google Drive...');
         
-        // 3. Configuração da Autenticação
         this.oauth2Client = new google.auth.OAuth2(
             process.env.GOOGLE_CLIENT_ID,
             process.env.GOOGLE_CLIENT_SECRET,
             process.env.GOOGLE_REDIRECT_URI
         );
 
-        // Define as credenciais (Aqui é onde estava dando erro antes)
         this.oauth2Client.setCredentials({ 
             refresh_token: process.env.GOOGLE_REFRESH_TOKEN 
         });
 
-        // Inicializa o cliente do Drive
         this.drive = google.drive({ version: 'v3', auth: this.oauth2Client });
         console.log('✅ Google Drive Service autenticado com sucesso.');
     }
@@ -39,7 +39,7 @@ class DriveService {
      */
     async createFolder(folderName, parentId = null) {
         try {
-            // Verifica se a pasta já existe para não duplicar (Opcional, mas recomendado)
+            // Verifica se a pasta já existe para não duplicar
             const query = `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false ${parentId ? `and '${parentId}' in parents` : ''}`;
             const existing = await this.drive.files.list({
                 q: query,
@@ -100,13 +100,12 @@ class DriveService {
         try {
             await this.drive.files.update({
                 fileId: fileId,
-                resource: { trashed: true } // Mover para lixeira é mais seguro que delete permanente
+                resource: { trashed: true } // Move para a lixeira ao invés de deletar permanentemente
             });
+
             console.log(`🗑️ Arquivo ${fileId} movido para a lixeira do Drive.`);
         } catch (error) {
             console.error(`❌ Erro ao deletar arquivo ${fileId}:`, error.message);
-            // Não lançamos erro aqui para permitir que o sistema remova do banco mesmo se falhar no Drive
-            // (Ex: se o arquivo já foi apagado manualmente lá)
         }
     }
 
@@ -147,5 +146,4 @@ class DriveService {
     }
 }
 
-// Exporta uma instância única (Singleton) já inicializada
 module.exports = new DriveService();

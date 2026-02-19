@@ -6,6 +6,12 @@ const Database = require('../config/Database');
  * O endpoint GET /dashboard/stats retorna estatísticas diferentes dependendo do papel do usuário:
  */
 class DashboardController {
+
+    /**
+     * Retorna estatísticas para o dashboard do professor ou coordenador.
+     * 1. Para coordenadores: total de pastas, espaço usado e total de usuários.
+     * 2. Para professores: total de entregas e documentos pendentes.
+     */
     async getStats(req, res) {
         try {
             const userId = req.userId; // ID do professor logado
@@ -15,32 +21,26 @@ class DashboardController {
             let stats = {};
 
             if (userRole === 'coordenador') {
-                // --- ESTATÍSTICAS DO COORDENADOR (GLOBAIS) ---
-                
-                // 1. Total de Pastas (SubmissionFolder) de TODO O SISTEMA
+
                 const [folders] = await Database.query(`SELECT COUNT(*) as total FROM submission_folders`);
 
-                // 2. Espaço total usado no Drive (Soma de todos os documentos COMPLETED)
                 const [storage] = await Database.query(`SELECT SUM(size_bytes) as total FROM documents WHERE status = 'COMPLETED'`);
 
-                // 3. Total de Professores (Já que não temos alunos, contar usuários pode ser útil, ou remova se preferir)
                 const [users] = await Database.query(`SELECT COUNT(*) as total FROM users`);
 
                 stats = {
                     totalFolders: folders.total,
                     totalStorage: storage.total,
-                    totalUsers: users.total, 
+                    totalUsers: users.total,
                 };
 
             } else {
 
-                // 2. Total de Entregas (Pastas criadas)
                 const [submissions] = await Database.query(
                     `SELECT COUNT(*) as total FROM submission_folders WHERE user_id = ?`,
                     [userId]
                 );
 
-                // 3. Documentos pendentes de processamento (Worker)
                 const [pending] = await Database.query(
                     `SELECT COUNT(*) as total FROM documents WHERE status = 'PENDING' OR status = 'UPLOADING'`
                 );

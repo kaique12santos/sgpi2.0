@@ -15,7 +15,6 @@ export default function UserManagementPage() {
     const [activePage, setActivePage] = useState(1);
     const itemsPerPage = 10;
 
-    // --- CARREGAR DADOS ---
     useEffect(() => {
         loadUsers();
     }, []);
@@ -154,7 +153,7 @@ export default function UserManagementPage() {
     );
 }
 
-// --- SUB-COMPONENTE DE FORMULÁRIO (DENTRO DO MESMO ARQUIVO PARA SIMPLIFICAR) ---
+// função de formulário de edição dentro do modal
 function EditUserForm({ user, onSave }) {
     const [formData, setFormData] = useState({ 
         name: user.name, 

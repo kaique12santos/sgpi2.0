@@ -6,7 +6,7 @@
 
 const app = require('./src/app');
 const UploadQueueWorker = require('./src/services/UploadQueueWorker');
-// Importação condicional para evitar erro enquanto não movemos o arquivo
+
 let cleanupService;
 try {
     cleanupService = require('./src/services/cleanupService');
@@ -40,6 +40,5 @@ app.listen(PORT, () => {
     console.log(`\n=========================================`);
     console.log(`🚀 SGPI 2.0 (GED) rodando na porta ${PORT}`);
     console.log(`📁 Modo: Gestão Documental`);
-    console.log(`📝 Documentação: /backend/docs`);
     console.log(`=========================================\n`);
 });

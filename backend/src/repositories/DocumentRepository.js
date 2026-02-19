@@ -14,8 +14,6 @@ class DocumentRepository {
      */
     async create({ folder_id, original_name, local_path, mime_type, size_bytes }) {
         
-        // 1. A query não tem mais o campo 'title'
-        // 2. Mantivemos a SUBQUERY para converter o ID do Drive (String) no ID da Pasta (Int)
         const sql = `
             INSERT INTO documents 
             (
@@ -34,8 +32,8 @@ class DocumentRepository {
         `;
         
         const result = await Database.query(sql, [
-            folder_id,      // O ID do Drive que vem do Front (vai para a subquery)
-            original_name,  // Nome do arquivo (ex: projeto.pdf)
+            folder_id,      
+            original_name,  
             local_path, 
             mime_type, 
             size_bytes
@@ -71,16 +69,14 @@ class DocumentRepository {
         let sql = `UPDATE documents SET status = ?`;
         const params = [status];
 
-        // Debug: Vamos ver o que chega no Repositório
+        // Se houver um link externo, vamos salvar no banco (para casos de links que não passam pelo upload tradicional)
         if (driveData.externalLink) {
             console.log(`💾 [Repo] Salvando external_link no banco: ${driveData.externalLink}`);
         }
 
-        // Se tiver ID do Drive, atualiza os campos
         if (driveData && (driveData.id || driveData.drive_file_id)) {
             const realDriveId = driveData.id || driveData.drive_file_id;
             
-            // USE O NOME EXATO DAS COLUNAS DO SEU BANCO
             sql += `, drive_file_id = ?, drive_web_link = ?, drive_download_link = ?`;
             params.push(realDriveId, driveData.webViewLink, driveData.webContentLink);
         }
@@ -136,8 +132,9 @@ class DocumentRepository {
         const rows = await Database.query(sql, [id]);
         return rows[0];
     }
+    //--------------------------------
 
-    // --- MÉTODO DE EXCLUSÃO (CASO QUEIRA IMPLEMENTAR) ---
+    // --- MÉTODOS DE EXCLUSÃO ---
     async delete(id) {
         const sql = `DELETE FROM documents WHERE id = ?`;
         await Database.query(sql, [id]);

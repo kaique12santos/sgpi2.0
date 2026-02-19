@@ -12,12 +12,10 @@ class SubmissionFolderController {
      */
     async index(req, res) {
         try {
-            // Usa o novo método do repositório
+
             const folders = await SubmissionFolderRepository.findAll();
-            
-            // Opcional: Se quiser formatar aqui para facilitar pro front
-            // Mas pode mandar cru também
             return res.json(folders);
+
         } catch (error) {
             console.error('Erro ao listar pastas:', error);
             return res.status(500).json({ error: 'Erro ao buscar disciplinas.' });
@@ -34,8 +32,6 @@ class SubmissionFolderController {
      * @returns {number} ID da nova pasta criada
      */
     async createNewPacket({ title, user_id, drive_folder_id, parent_drive_id }) {
-        // Truque ninja: Usamos o parent_drive_id (ID da pasta da disciplina) 
-        // para descobrir qual é o discipline_id e semester_id corretos via subquery
         const sql = `
             INSERT INTO submission_folders 
             (title, user_id, semester_id, discipline_id, drive_folder_id)
@@ -84,7 +80,7 @@ class SubmissionFolderController {
      */
     async getAllFolders(req, res) {
         try {
-            // Chama o repositório que já faz o trabalho pesado
+            
             const folders = await SubmissionFolderRepository.findAllWithDetails();
             
             return res.json(folders);

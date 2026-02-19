@@ -6,11 +6,11 @@ export const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    // Loading inicial para verificar se já existia token salvo ao abrir o site
+   
     const [loading, setLoading] = useState(true); 
 
     useEffect(() => {
-        // Ao abrir o site, verifica se tem token salvo
+        
         const recoveredUser = localStorage.getItem('sgpi_user');
         const token = localStorage.getItem('sgpi_token');
 
@@ -27,22 +27,18 @@ export const AuthProvider = ({ children }) => {
 
             const { token, user: userData } = response.data;
 
-            // Salva no LocalStorage (Persistência)
             localStorage.setItem('sgpi_user', JSON.stringify(userData));
             localStorage.setItem('sgpi_token', token);
 
-            // Atualiza o Axios para futuras requisições
             api.defaults.headers.Authorization = `Bearer ${token}`;
 
-            // Atualiza o estado global
             setUser(userData);
 
-            return true; // Sucesso
+            return true; 
 
         } catch (error) {
             console.error("Erro no login:", error);
             
-            // Tratamento de erros específicos (ex: Conta não verificada)
             const message = error.response?.data?.error || 'Erro ao conectar com o servidor.';
             
             notifications.show({

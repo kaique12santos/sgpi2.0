@@ -18,19 +18,22 @@ class UserRepository {
     async create(user) {
         const hashedPassword = await bcrypt.hash(user.password, 10);
         const sql = `INSERT INTO users (name, email, password_hash, role, is_verified, verification_token, reset_expires) VALUES (?, ?, ?, ?, ?, ?, ?)`;
-        // Adicione os novos campos no array de valores
         const result = await Database.query(sql, [user.name, user.email, hashedPassword, user.role, user.is_verified, user.verification_token, user.reset_expires]);
         return result.insertId;
     }
 
-    // Atualiza campos específicos do usuário.
+    /**
+     * Atualiza campos específicos do usuário.
+     * @param {number} id - ID do usuário a ser atualizado.
+     * @param {Object} fields - Campos a serem atualizados.
+     * @returns {Promise<void>}
+     */
     async update(id, fields) {
         const keys = Object.keys(fields);
         const values = Object.values(fields);
         
         if (keys.length === 0) return;
 
-        // Cria a query: UPDATE users SET password = ?, verification_token = ? WHERE id = ?
         const setClause = keys.map(key => {
             if (key === 'password') return `password_hash = ?`; // <--- TRADUÇÃO
             return `${key} = ?`;

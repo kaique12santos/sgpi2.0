@@ -2,7 +2,7 @@ const SystemRepository = require('../repositories/SystemRepository');
 
 class SystemController {
 
-    // Público - Qualquer professor pode ver
+    // Público - Todos podem ver
     async getMessage(req, res) {
         try {
             const message = await SystemRepository.getMessage();
@@ -17,7 +17,6 @@ class SystemController {
     async updateMessage(req, res) {
         try {
             const { content, type, is_active } = req.body;
-            // Validação simples
             if (!content) return res.status(400).json({ error: 'Conteúdo obrigatório.' });
 
             const updated = await SystemRepository.updateMessage({ content, type, is_active });
