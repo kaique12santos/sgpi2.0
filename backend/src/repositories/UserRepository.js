@@ -35,7 +35,7 @@ class UserRepository {
         if (keys.length === 0) return;
 
         const setClause = keys.map(key => {
-            if (key === 'password') return `password_hash = ?`; // <--- TRADUÇÃO
+            if (key === 'password') return `password_hash = ?`;
             return `${key} = ?`;
         }).join(', ');
         const sql = `UPDATE users SET ${setClause} WHERE id = ?`;
@@ -82,18 +82,18 @@ class UserRepository {
         return await Database.query(sql);
     }
 
-    /**
-     * Atualiza dados de um usuário específico (Admin editando alguém).
-     */
-    async update(id, { name, email, role }) {
-        const sql = `
-            UPDATE users 
-            SET name = ?, email = ?, role = ? 
-            WHERE id = ?
-        `;
-        await Database.query(sql, [name, email, role, id]);
-        return this.findById(id);
-    }
+    // /**
+    //  * Atualiza dados de um usuário específico (Admin editando alguém).
+    //  */
+    // async update(id, { name, email, role }) {
+    //     const sql = `
+    //         UPDATE users 
+    //         SET name = ?, email = ?, role = ? 
+    //         WHERE id = ?
+    //     `;
+    //     await Database.query(sql, [name, email, role, id]);
+    //     return this.findById(id);
+    // }
 
     /**
      * Deleta um usuário.
