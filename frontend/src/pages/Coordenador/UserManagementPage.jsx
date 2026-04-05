@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { 
     Container, Title, Table, Group, Text, Badge, ActionIcon, 
-    Paper, Avatar, Button, TextInput, Select, LoadingOverlay, Pagination 
+    Paper, Avatar, Button, TextInput, Select, LoadingOverlay, Pagination, Tooltip 
 } from '@mantine/core';
 import { IconPencil, IconTrash, IconSearch, IconUserPlus } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
@@ -115,9 +115,22 @@ export default function UserManagementPage() {
         <Container size="xl" py="xl">
             <Group justify="space-between" mb="lg">
                 <Title order={2}>Gerenciar Usuários</Title>
-                <Button leftSection={<IconUserPlus size={16}/>} onClick={() => notifications.show({message: 'Implementação futura: Criar via Admin'})}>
-                    Novo Usuário
-                </Button>
+                
+                <Tooltip 
+                    label="Em breve: Criação de usuários será liberada em atualizações futuras" 
+                    withArrow 
+                    position="top"
+                >
+                    {/* A div ao redor é obrigatória para o Tooltip funcionar em botões desativados */}
+                    <div style={{ display: 'inline-block' }}>
+                        <Button 
+                            disabled 
+                            leftSection={<IconUserPlus size={16}/>}
+                        >
+                            Novo Usuário
+                        </Button>
+                    </div>
+                </Tooltip>
             </Group>
 
             <Paper withBorder p="md" radius="md">

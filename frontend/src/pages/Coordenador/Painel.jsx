@@ -296,10 +296,21 @@ export default function CoordinatorPanelPage() {
                     <Title order={2}>Painel de Controle</Title>
                     <Text c="dimmed">Visão geral de todas as entregas dos professores.</Text>
                 </div>
-                {/* Botão de Exportar Relatório (Visual por enquanto) */}
-                <Button variant="light" color="green" leftSection={<IconFileText size={18}/>}>
-                    Gerar Relatório
-                </Button>
+                <Tooltip 
+                    label="Em breve: Geração de relatórios será liberada em atualizações futuras" 
+                    withArrow 
+                    position="top"
+                >
+                    {/* A div ao redor é obrigatória para o Tooltip funcionar em botões desativados */}
+                    <div style={{ display: 'inline-block' }}>
+                        <Button 
+                            disabled 
+                            leftSection={<IconFileText size={18}/>}
+                        >
+                            Gerar Relatório
+                        </Button>
+                    </div>
+                </Tooltip>
             </Group>
 
             <Paper withBorder p="md" radius="md" shadow="sm" mb="xl">
