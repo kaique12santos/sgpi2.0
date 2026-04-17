@@ -2,29 +2,31 @@ const Database = require('../config/Database');
 
 /**
  * Controller para o dashboard do professor e coordenador.
- * 
- * O endpoint GET /dashboard/stats retorna estatísticas diferentes dependendo do papel do usuário:
  */
 class DashboardController {
 
-    /**
-     * Retorna estatísticas para o dashboard do professor ou coordenador.
-     * 1. Para coordenadores: total de pastas, espaço usado e total de usuários.
-     * 2. Para professores: total de entregas e documentos pendentes.
-     */
     async getStats(req, res) {
         try {
-            const userId = req.userId; // ID do professor logado
+            const userId = req.userId; 
 
             const [userRows] = await Database.query('SELECT role FROM users WHERE id = ?', [userId]);
             const userRole = userRows.role || 'professor';
             let stats = {};
 
+            const activeSemesterQuery = `(SELECT id FROM semesters WHERE is_active = 1 LIMIT 1)`;
+
             if (userRole === 'coordenador') {
 
-                const [folders] = await Database.query(`SELECT COUNT(*) as total FROM submission_folders`);
+                const [folders] = await Database.query(
+                    `SELECT COUNT(*) as total FROM submission_folders WHERE semester_id = ${activeSemesterQuery}`
+                );
 
-                const [storage] = await Database.query(`SELECT SUM(size_bytes) as total FROM documents WHERE status = 'COMPLETED'`);
+               const [storage] = await Database.query(
+                    `SELECT COALESCE(SUM(d.size_bytes), 0) as total 
+                     FROM documents d
+                     JOIN submission_folders sf ON d.folder_id = sf.id
+                     WHERE d.status = 'COMPLETED' AND sf.semester_id = ${activeSemesterQuery}`
+                );
 
                 const [users] = await Database.query(`SELECT COUNT(*) as total FROM users`);
 
@@ -37,12 +39,20 @@ class DashboardController {
             } else {
 
                 const [submissions] = await Database.query(
-                    `SELECT COUNT(*) as total FROM submission_folders WHERE user_id = ?`,
+                    `SELECT COUNT(*) as total 
+                     FROM submission_folders 
+                     WHERE user_id = ? AND semester_id = ${activeSemesterQuery}`,
                     [userId]
                 );
 
                 const [pending] = await Database.query(
-                    `SELECT COUNT(*) as total FROM documents WHERE status = 'PENDING' OR status = 'UPLOADING'`
+                    `SELECT COUNT(*) as total 
+                     FROM documents d
+                     JOIN submission_folders sf ON d.folder_id = sf.id
+                     WHERE (d.status = 'PENDING' OR d.status = 'UPLOADING') 
+                       AND sf.user_id = ? 
+                       AND sf.semester_id = ${activeSemesterQuery}`,
+                    [userId]
                 );
 
                 stats = {

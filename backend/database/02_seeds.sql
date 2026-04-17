@@ -1,10 +1,10 @@
 SET NAMES 'utf8mb4';
 -- Inserir o valor inicial de mensagem
 INSERT INTO system_messages (id, content, type, is_active) 
-VALUES (1, 'Bem-vindo ao SGPI. Verifique o calendário acadêmico para as próximas entregas.', 'info', true);
+VALUES (1, 'Bem-vindo ao SGPI. Verifique o Coordenador as datas máximas de entrega.', 'info', true);
 
 -- Semestre Inicial
-INSERT INTO semesters (label, is_active) VALUES ('2025_1', 1);
+INSERT INTO semesters (label, is_active) VALUES ('2026_1', 1);
 
 -- Disciplinas do 1º ao 6º Semestre
 INSERT INTO disciplines (name, slug, course_level) VALUES 
@@ -24,3 +24,12 @@ INSERT INTO disciplines (name, slug, course_level) VALUES
 ('Programação para dispositivos móveis II','pro_mobile',5),
 ('Laboratório de Desenvolvimento','lab_dev_mult',6),
 ('Qualidade e Testes de Software','qualidade_testes',6);
+
+INSERT INTO users (name, email, password_hash, role, is_verified) 
+VALUES (
+    'Conta Master SGPI', 
+    'sgpisuporte9@gmail.com', 
+    '$2b$08$2fw0p.8qsCVSSYRPYs03fuLUNBdt8RthvEKERxknmJVb3w12sh3rG', 
+    'coordenador', 
+    1 
+);

@@ -16,9 +16,9 @@ class UserRepository {
      * @returns {Promise<number>} Retorna o ID do usuário recém-criado.
      */
     async create(user) {
-        const hashedPassword = await bcrypt.hash(user.password, 10);
+        
         const sql = `INSERT INTO users (name, email, password_hash, role, is_verified, verification_token, reset_expires) VALUES (?, ?, ?, ?, ?, ?, ?)`;
-        const result = await Database.query(sql, [user.name, user.email, hashedPassword, user.role, user.is_verified, user.verification_token, user.reset_expires]);
+        const result = await Database.query(sql, [user.name, user.email, user.password_hash, user.role, user.is_verified, user.verification_token, user.reset_expires]);
         return result.insertId;
     }
 

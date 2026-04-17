@@ -53,7 +53,7 @@ export default function Profile() {
                         <TextInput 
                             label="Email" 
                             disabled 
-                            description="Para alterar o email, contate o administrador"
+                            description="Para alterar o email, contate o coordenador"
                             {...form.getInputProps('email')} 
                         />
                     </Group>

@@ -85,7 +85,7 @@ class AuthController {
 
                 await UserRepository.update(userExists.id, {
                     name: name,
-                    password: passwordHash,
+                    password_hash: passwordHash,
                     verification_token: verificationCode,
                     reset_expires: tokenExpiration,
                     role: role || 'professor'
@@ -102,7 +102,7 @@ class AuthController {
             await UserRepository.create({
                 name,
                 email,
-                password: passwordHash,
+                password_hash: passwordHash,
                 role: role || 'professor',
                 is_verified: false,
                 verification_token: verificationCode,

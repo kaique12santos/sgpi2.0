@@ -42,7 +42,7 @@ class SubmissionFolderRepository {
             FROM submission_folders sf
             LEFT JOIN disciplines d ON sf.discipline_id = d.id
             LEFT JOIN semesters s ON sf.semester_id = s.id
-            
+            WHERE s.is_active = 1
             ORDER BY sf.created_at DESC
         `;
         return await Database.query(sql);
@@ -103,6 +103,9 @@ class SubmissionFolderRepository {
      * Retorna: ID, Título, Disciplina, Semestre, Link Drive, Qtd Arquivos, Qtd Pendentes
      */
     async findByUserWithStats(userId) {
+        console.log(`\n======================================`);
+        console.log(`[DEBUG - INÍCIO] Buscando pastas do Professor ID: ${userId}`);
+        
         const sql = `
             SELECT 
                 sf.id,
@@ -111,19 +114,25 @@ class SubmissionFolderRepository {
                 sf.drive_folder_id,
                 d.name as discipline_name,
                 s.label as semester_label,
-                -- CORREÇÃO AQUI TAMBÉM:
                 (SELECT COUNT(*) FROM documents doc WHERE doc.folder_id = sf.id) as total_files,
                 (SELECT COUNT(*) FROM documents doc WHERE doc.folder_id = sf.id AND doc.status IN ('PENDING', 'UPLOADING')) as pending_files,
                 (SELECT COUNT(*) FROM documents doc WHERE doc.folder_id = sf.id AND doc.status = 'ERROR') as error_files
-            
             FROM submission_folders sf
             JOIN disciplines d ON sf.discipline_id = d.id
             JOIN semesters s ON sf.semester_id = s.id
-            WHERE sf.user_id = ?
+            WHERE sf.user_id = ? AND s.is_active = 1
             ORDER BY sf.created_at DESC
         `;
         
-        return await Database.query(sql, [userId]);
+        const rows = await Database.query(sql, [userId]);
+        
+        console.log(`[DEBUG - RESULTADO] O banco retornou ${rows.length} pastas.`);
+        rows.forEach(row => {
+            console.log(` ---> Pasta: "${row.title}" | Semestre: ${row.semester_label}`);
+        });
+        console.log(`======================================\n`);
+
+        return rows;
     }
 
    /**
@@ -151,6 +160,7 @@ class SubmissionFolderRepository {
             JOIN users u ON sf.user_id = u.id
             JOIN disciplines d ON sf.discipline_id = d.id
             JOIN semesters s ON sf.semester_id = s.id
+            WHERE s.is_active = 1
             ORDER BY sf.created_at DESC
         `;
         

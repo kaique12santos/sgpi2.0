@@ -96,7 +96,7 @@ export default function CoordinatorPanelPage() {
         });
     };
 
-    const handleDownloadZip = async (folderId, folderTitle) => {
+   const handleDownloadZip = async (folderId, folderTitle) => {
         try {
             setDownloadingId(folderId); 
             
@@ -104,13 +104,15 @@ export default function CoordinatorPanelPage() {
                 id: 'download-load', 
                 loading: true, 
                 title: 'Gerando ZIP...', 
-                message: 'Isso pode levar alguns segundos.', 
+                message: 'Compactando arquivos do Google Drive. Isso pode levar alguns minutos para arquivos grandes...', 
                 autoClose: false, 
                 withCloseButton: false 
             });
 
+            // CORREÇÃO: Adicionando timeout: 0 para o Axios aguardar o tempo que for necessário
             const response = await api.get(`/downloads/folder/${folderId}`, {
-                responseType: 'blob' 
+                responseType: 'blob',
+                timeout: 0 // <--- A MÁGICA ESTÁ AQUI! (0 = tempo infinito)
             });
 
             const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -130,20 +132,24 @@ export default function CoordinatorPanelPage() {
             notifications.update({ 
                 id: 'download-load', 
                 color: 'green', 
-                title: 'Download Iniciado', 
-                message: 'O arquivo ZIP foi transferido.', 
+                title: 'Download Concluído', 
+                message: 'O arquivo ZIP foi gerado e transferido com sucesso!', 
                 icon: <IconCheck size={16} />, 
-                autoClose: 3000 
+                autoClose: 5000 
             });
 
         } catch (error) {
             console.error('Erro download:', error);
+            
+            // Tratamento de erro melhorado para sabermos se o erro veio do backend ou do timeout
+            const errorMessage = error.response?.data?.error || 'Não foi possível gerar o pacote ZIP. Tente novamente.';
+            
             notifications.update({ 
                 id: 'download-load', 
                 color: 'red', 
                 title: 'Falha no Download', 
-                message: 'Não foi possível gerar o pacote ZIP.', 
-                autoClose: 4000 
+                message: errorMessage, 
+                autoClose: 5000 
             });
         } finally {
             setDownloadingId(null);

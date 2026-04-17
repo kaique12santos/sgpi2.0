@@ -93,8 +93,8 @@ export default function Login() {
 
                         <form onSubmit={form.onSubmit(handleSubmit)}>
                             <TextInput 
-                                label="E-mail institucional" 
-                                placeholder="nome@fatec.sp.gov.br" 
+                                label="E-mail" 
+                                placeholder="Informe seu email" 
                                 required 
                                 radius="md"
                                 styles={{ input: { backgroundColor: '#f8f9fa' } }} 

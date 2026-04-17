@@ -147,8 +147,8 @@ export default function Register() {
                                 
                                 <TextInput 
                                     mt="md" 
-                                    label="Email Institucional" 
-                                    placeholder="seu@fatec.sp.gov.br" 
+                                    label="E-mail" 
+                                    placeholder="Informe seu email" 
                                     required 
                                     radius="md"
                                     styles={{ input: { backgroundColor: '#f8f9fa' } }}

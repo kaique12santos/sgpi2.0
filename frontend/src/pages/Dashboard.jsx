@@ -110,7 +110,7 @@ const ProfessorDashboard = ({ stats, navigate, loading, systemNotice }) => {
                         <ThemeIcon color="fatecBlue" variant="light"><IconFiles size="1.2rem" /></ThemeIcon>
                     </Group>
                     <Skeleton visible={loading}>
-                        <Text fz="xl" fw={700}>{stats.submissionsCount || 0} Pastas</Text>
+                        <Text fz="xl" fw={700}>{stats.submissionsCount || 0} Pacotes</Text>
                         <Text size="xs" c="dimmed" mt="sm">Pacotes enviados</Text>
                     </Skeleton>
                 </Card>

@@ -117,7 +117,7 @@ class DriveService {
     async getFileStream(fileId) {
         try {
             const response = await this.drive.files.get(
-                { fileId: fileId, alt: 'media' },
+                { fileId: fileId, alt: 'media', acknowledgeAbuse: true },
                 { responseType: 'stream' }
             );
             return response.data;

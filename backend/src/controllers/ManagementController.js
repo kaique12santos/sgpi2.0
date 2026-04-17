@@ -84,7 +84,7 @@ class ManagementController {
 
                 if (qtdArquivos > 0) {
                     return res.status(400).json({
-                        error: `BLOQUEIO LEGAL: Esta entrega tem ${diffAnos.toFixed(1)} anos. A legislação exige guarda por 5 anos. Apague apenas os arquivos errados individualmente.`
+                        error: `BLOQUEIO LEGAL: Esta entrega tem ${diffAnos.toFixed(1)} anos. A legislação exige guarda por 5 anos. Apague apenas os arquivos errados individualmente. direto no driver`
                     });
                 }
             }

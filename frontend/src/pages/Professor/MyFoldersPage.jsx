@@ -10,16 +10,15 @@ import { IconPencil, IconTrash, IconFolder, IconFileText, IconAlertTriangle, Ico
 } from '@tabler/icons-react';
 import api from '../../api/axios'; 
 
-
 const PPT_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
 const VIDEO_MIME_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
-
-
+const MAX_TOTAL_FILES = 10; // Limite global definido aqui
 
 export default function MyFoldersPage() {
 
     const [folders, setFolders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [existingFileCount, setExistingFileCount] = useState(0);
 
     // Estados para Edição (Rename)
     const [editModalOpen, setEditModalOpen] = useState(false);
@@ -30,6 +29,7 @@ export default function MyFoldersPage() {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [folderToDelete, setFolderToDelete] = useState(null);
     const [deleting, setDeleting] = useState(false);
+    
     // Estados para Upload de Arquivos
     const [uploadModalOpen, setUploadModalOpen] = useState(false);
     const [folderToAddFiles, setFolderToAddFiles] = useState(null);
@@ -46,7 +46,6 @@ export default function MyFoldersPage() {
     const fetchFolders = async () => {
         try {
             setLoading(true);
-            // Chama a rota que criamos: GET /api/folders/my-folders
             const response = await api.get('/folders/my-folders'); 
             setFolders(response.data.folders || []);
         } catch (error) {
@@ -67,14 +66,11 @@ export default function MyFoldersPage() {
         
         try {
             await api.put(`/folders/${editingFolder.id}`, { title: newTitle });
-            
             notifications.show({ title: 'Sucesso', message: 'Pasta renomeada!', color: 'green' });
             
-            // Atualiza a lista localmente para não precisar recarregar tudo do servidor
             setFolders(current => current.map(f => 
                 f.id === editingFolder.id ? { ...f, title: newTitle } : f
             ));
-            
             setEditModalOpen(false);
         } catch (error) {
             console.error(error);
@@ -89,12 +85,9 @@ export default function MyFoldersPage() {
 
         try {
             await api.delete(`/folders/${folderToDelete.id}`);
-            
             notifications.show({ title: 'Removido', message: 'Pacote excluído com sucesso.', color: 'blue' });
             
-            // Remove da lista localmente
             setFolders(current => current.filter(f => f.id !== folderToDelete.id));
-            
             setDeleteModalOpen(false);
         } catch (error) {
             console.error(error);
@@ -103,6 +96,7 @@ export default function MyFoldersPage() {
             setDeleting(false);
         }
     };
+
     // 4. POST: Função de Adicionar Arquivos
     const handleAddFiles = async () => {
         if (filesToAdd.length === 0) return;
@@ -118,7 +112,6 @@ export default function MyFoldersPage() {
 
             notifications.show({ title: 'Sucesso', message: 'Arquivos adicionados!', color: 'green' });
             
-            // Atualiza a contagem na lista localmente
             setFolders(current => current.map(f => 
                 f.id === folderToAddFiles.id 
                 ? { ...f, total_files: f.total_files + filesToAdd.length } 
@@ -127,7 +120,6 @@ export default function MyFoldersPage() {
 
             setUploadModalOpen(false);
             setFilesToAdd([]);
-
         } catch (error) {
             console.error(error);
             notifications.show({ title: 'Erro', message: 'Falha ao enviar arquivos.', color: 'red' });
@@ -135,12 +127,13 @@ export default function MyFoldersPage() {
             setUploading(false);
         }
     };
+
     // 5. GET: Função de Visualizar Arquivos
     const handleViewFiles = async (folder) => {
         setViewingFolder(folder);
         setLoadingFiles(true);
         setViewFilesModalOpen(true);
-        setFolderFiles([]); // Limpa anterior
+        setFolderFiles([]); 
 
         try {
             const response = await api.get(`/folders/${folder.id}/files`);
@@ -153,50 +146,59 @@ export default function MyFoldersPage() {
         }
     };
 
-     // Função Validadora (O Porteiro 👮‍♂️)
-const handleFilesDrop = (acceptedFiles) => {
-    const invalidFiles = [];
-    
-    // Regex: Permite APENAS letras (a-z), números, ponto, traço e underline.
-    // NADA de espaços, acentos, ç ou emojis.
-    const safePattern = /^[a-zA-Z0-9._-]+$/;
+    // Função para remover um arquivo específico da fila de adição
+    const removeFile = (indexToRemove) => {
+        setFilesToAdd((current) => current.filter((_, index) => index !== indexToRemove));
+    };
 
-    const validFiles = acceptedFiles.filter((file) => {
-        if (!safePattern.test(file.name)) {
-            invalidFiles.push(file.name);
-            return false;
+    // Função Validadora (O Porteiro 👮‍♂️) - AGORA COM TRAVA MATEMÁTICA
+    const handleFilesDrop = (acceptedFiles) => {
+        const currentTotal = existingFileCount; 
+        const stagedTotal = filesToAdd.length;
+        const incomingTotal = acceptedFiles.length;
+
+        // VALIDAÇÃO 1: O limite global (Banco + Fila + Arrasto)
+        if (currentTotal + stagedTotal + incomingTotal > MAX_TOTAL_FILES) {
+            const vagas = Math.max(0, MAX_TOTAL_FILES - (currentTotal + stagedTotal));
+            return notifications.show({
+                title: 'Limite Atingido!',
+                message: `Esta pasta já possui ${currentTotal} arquivo(s). Você só pode adicionar mais ${vagas} item(ns). Utilize um arquivo .ZIP!`,
+                color: 'red',
+                autoClose: 8000,
+            });
         }
-        return true;
-    });
 
-    // Se houver arquivos inválidos, mostra o alerta e NÃO adiciona nada
-    if (invalidFiles.length > 0) {
-        notifications.show({
-            title: 'Nome de arquivo inválido!',
-            message: (
-                <>
-                    Os seguintes arquivos contêm acentos, espaços ou caracteres especiais:
-                    <br />
-                    <strong>{invalidFiles.join(', ')}</strong>
-                    <br /><br />
-                    Por favor, renomeie-os usando apenas letras, números, underline (_) ou traço (-).
-                </>
-            ),
-            color: 'red',
-            autoClose: 10000, // Fica 10 segundos na tela pra ele ler
+        const invalidFiles = [];
+        const safePattern = /^[a-zA-Z0-9._-]+$/;
+
+        const validFiles = acceptedFiles.filter((file) => {
+            if (!safePattern.test(file.name)) {
+                invalidFiles.push(file.name);
+                return false;
+            }
+            return true;
         });
-        
-        // Opcional: Se quiser aceitar os válidos mesmo assim, descomente abaixo.
-        // Mas geralmente é melhor forçar o usuário a arrumar tudo.
-        // setFiles((current) => [...current, ...validFiles]);
-        return; 
-    }
 
-    // Se passou no teste, adiciona na lista
-    setFilesToAdd((current) => [...current, ...validFiles]);
-};
+        // VALIDAÇÃO 2: Nomes Inválidos
+        if (invalidFiles.length > 0) {
+            notifications.show({
+                title: 'Nome de arquivo inválido!',
+                message: (
+                    <>
+                        Os seguintes arquivos contêm acentos, espaços ou caracteres especiais:
+                        <br /><strong>{invalidFiles.join(', ')}</strong><br /><br />
+                        Por favor, renomeie-os usando apenas letras, números, underline (_) ou traço (-).
+                    </>
+                ),
+                color: 'red',
+                autoClose: 10000, 
+            });
+            return; 
+        }
 
-    // ... (Helper para formatar Bytes em MB)
+        setFilesToAdd((current) => [...current, ...validFiles]);
+    };
+
     const formatBytes = (bytes) => {
         if (bytes === 0) return '0 B';
         const k = 1024;
@@ -204,27 +206,36 @@ const handleFilesDrop = (acceptedFiles) => {
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
-    // Preparar Modal de Edição
+
     const openEditModal = (folder) => {
         setEditingFolder(folder);
         setNewTitle(folder.title);
         setEditModalOpen(true);
     };
     
-    // Preparar Modal de Upload
-    const openUploadModal = (folder) => {
+    const openUploadModal = async (folder) => {
         setFolderToAddFiles(folder);
         setFilesToAdd([]);
+        setExistingFileCount(0);
         setUploadModalOpen(true);
+       // remover daqui futuramente e mover para manter a arquitertura limpa, mas por ora é necessário para a validação do porteiro
+        try {
+            
+            const response = await api.get(`/folders/${folder.id}/files`);
+            const realCount = response.data.length || 0;
+            setExistingFileCount(realCount);
+          
+        } catch (error) {
+            console.error("Erro ao checar arquivos existentes:", error);
+            setExistingFileCount(0); 
+        }
     };
 
-    // Preparar Modal de Exclusão
     const openDeleteModal = (folder) => {
         setFolderToDelete(folder);
         setDeleteModalOpen(true);
     };
 
-    // Renderização das linhas da tabela
     const rows = folders.map((folder) => (
         <Table.Tr key={folder.id}>
             <Table.Td>
@@ -251,25 +262,21 @@ const handleFilesDrop = (acceptedFiles) => {
             </Table.Td>
             <Table.Td>
                 <Group gap={4} justify="flex-end">
-                    
                     <Tooltip label="Ver conteúdo">
                         <ActionIcon variant="subtle" color="gray" onClick={() => handleViewFiles(folder)}>
                             <IconEye size={18} />
                         </ActionIcon>
                     </Tooltip>
-
                     <Tooltip label="Adicionar mais arquivos">
                         <ActionIcon variant="subtle" color="teal" onClick={() => openUploadModal(folder)}>
                             <IconCloudUpload size={18} />
                         </ActionIcon>
                     </Tooltip>
-
                     <Tooltip label="Renomear">
                         <ActionIcon variant="subtle" color="blue" onClick={() => openEditModal(folder)}>
                             <IconPencil size={18} />
                         </ActionIcon>
                     </Tooltip>
-                    
                     <Tooltip label="Excluir">
                         <ActionIcon variant="subtle" color="red" onClick={() => openDeleteModal(folder)}>
                             <IconTrash size={18} />
@@ -373,13 +380,12 @@ const handleFilesDrop = (acceptedFiles) => {
                 
                 <Group justify="flex-end" mt="md">
                     <Button variant="default" onClick={() => setViewFilesModalOpen(false)}>Fechar</Button>
-                    {/* Atalho para adicionar mais arquivos direto daqui */}
                     <Button 
                         color="teal" 
                         leftSection={<IconCloudUpload size={16} />}
                         onClick={() => {
                             setViewFilesModalOpen(false);
-                            openUploadModal(viewingFolder); // Reusa a função que já criamos!
+                            openUploadModal(viewingFolder); 
                         }}
                     >
                         Adicionar Mais
@@ -395,20 +401,26 @@ const handleFilesDrop = (acceptedFiles) => {
                 size="lg"
             >
                 <Text size="sm" c="dimmed" mb="md">
-                    Complemente sua entrega. Os arquivos serão adicionados à pasta existente.
+                    Complemente sua entrega. Você tem {existingFileCount} arquivo(s) salvos neste pacote. Limite máximo: {MAX_TOTAL_FILES}.
                 </Text>
 
                 <Dropzone
                     onDrop={handleFilesDrop}
+                    onReject={(rejections) => {
+                        if (rejections.some(r => r.errors.some(e => e.code === 'too-many-files'))) {
+                            notifications.show({ title: 'Limite Excedido', message: `O pacote não suporta essa quantidade. O limite global é de ${MAX_TOTAL_FILES} arquivos.`, color: 'red' });
+                        }
+                    }}
                     maxSize={100 * 1024 * 1024}
-                    // Use os mesmos accepts da tela de UploadPage
-                    accept={[MIME_TYPES.pdf, 
+                    maxFiles={Math.max(0, MAX_TOTAL_FILES - existingFileCount - filesToAdd.length)}
+                    accept={[
+                        MIME_TYPES.pdf, 
                         MIME_TYPES.zip, 
                         'application/x-zip-compressed',
                         'application/zip',
                         'application/vnd.rar',
-                        PPT_MIME_TYPE,       // Slides novos (.pptx)
-                        'application/vnd.ms-powerpoint', // Slides antigos (.ppt)
+                        PPT_MIME_TYPE,      
+                        'application/vnd.ms-powerpoint', 
                         ...VIDEO_MIME_TYPES
                     ]} 
                 >
@@ -424,11 +436,16 @@ const handleFilesDrop = (acceptedFiles) => {
                     </Group>
                 </Dropzone>
 
-                {/* Lista de arquivos selecionados */}
+                {/* Lista de arquivos selecionados COM BOTÃO DE EXCLUIR */}
                 {filesToAdd.length > 0 && (
                     <SimpleGrid cols={1} mt="sm">
                         {filesToAdd.map((f, i) => (
-                            <Text key={i} size="xs">• {f.name}</Text>
+                            <Group key={i} justify="space-between" wrap="nowrap" bg="gray.0" p="xs" style={{ borderRadius: 4, border: '1px solid #eee' }}>
+                                <Text size="xs" truncate>• {f.name}</Text>
+                                <ActionIcon color="red" variant="subtle" size="sm" onClick={() => removeFile(i)}>
+                                    <IconTrash size={14} />
+                                </ActionIcon>
+                            </Group>
                         ))}
                     </SimpleGrid>
                 )}

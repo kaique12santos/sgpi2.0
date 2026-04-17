@@ -18,6 +18,8 @@ class SemesterAutomationService {
         cron.schedule('1 0 * * *', async () => {
             console.log('⏰ [Cron] Verificando transição de semestre...');
             await this.checkAndRotateSemester();
+        }, {
+            timezone: "America/Sao_Paulo"
         });
         console.log('⏳ Serviço de Automação de Semestres iniciado.');
     }

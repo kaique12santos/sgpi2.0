@@ -1,9 +1,3 @@
-/**
- * Ponto de entrada (Entry Point) da aplicação SGPI 2.0.
- * Responsável apenas por iniciar o servidor e serviços agendados (Cron Jobs).
- * Não deve conter lógica de negócios ou configuração do Express.
- */
-
 const app = require('./src/app');
 const UploadQueueWorker = require('./src/services/UploadQueueWorker');
 

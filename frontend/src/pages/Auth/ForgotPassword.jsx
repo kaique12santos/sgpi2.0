@@ -68,7 +68,7 @@ export default function ForgotPassword() {
                         </Text>
                         <TextInput 
                             label="Email" 
-                            placeholder="seu@fatec.sp.gov.br" 
+                            placeholder="Informe seu email" 
                             required 
                             value={email}
                             onChange={(e) => setEmail(e.currentTarget.value)}
