@@ -9,5 +9,6 @@ router.use(authMiddleware);
 router.get('/users', AdminUserController.index);
 router.put('/users/:id', AdminUserController.update);
 router.delete('/users/:id', AdminUserController.delete);
+router.patch('/users/:id/toggle-approval', AdminUserController.toggleApproval);
 
 module.exports = router;

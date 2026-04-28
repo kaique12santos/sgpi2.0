@@ -31,5 +31,6 @@ VALUES (
     'sgpisuporte9@gmail.com', 
     '$2b$08$2fw0p.8qsCVSSYRPYs03fuLUNBdt8RthvEKERxknmJVb3w12sh3rG', 
     'coordenador', 
+    1,
     1 
 );

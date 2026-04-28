@@ -21,7 +21,7 @@ class MetadataController {
     }
 
     /**
-     * Retorna o semestre que está ativo no momento (ex: 2025_1).
+     * Retorna o semestre que está ativo no momento (ex: 2026_1).
      */
     async getActiveSemester(req, res) {
         try {

@@ -64,6 +64,28 @@ class AdminUserController {
             return res.status(500).json({ error: 'Erro ao deletar usuário.' });
         }
     }
+
+    
+    async toggleApproval(req, res) {
+    try {
+        const { id } = req.params;
+        const user = await UserRepository.findById(id); 
+        
+        if (!user) return res.status(404).json({ error: 'Usuário não encontrado.' });
+        if (user.role === 'coordenador' && user.id === req.userId) {
+            return res.status(400).json({ error: 'Você não pode alterar sua própria aprovação.' });
+        }
+
+        const newStatus = user.is_approved ? 0 : 1;
+        await UserRepository.update(id, { is_approved: newStatus });
+
+        const message = newStatus ? 'Usuário aprovado com sucesso!' : 'Acesso do usuário revogado.';
+        return res.status(200).json({ success: true, message, is_approved: newStatus });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Erro ao alterar aprovação do usuário.' });
+    }
+}
 }
 
 module.exports = new AdminUserController();

@@ -33,6 +33,12 @@ class AuthController {
                 });
             }
 
+            if (!user.is_approved) {
+                return res.status(403).json({ 
+                    error: 'Sua conta já foi verificada, mas ainda aguarda a aprovação da Coordenação para acessar o sistema.' 
+                });
+            }
+
             const senhaBate = await bcrypt.compare(password, user.password_hash);
             if (!senhaBate) {
                 return res.status(401).json({ error: 'Senha Incorreta' });

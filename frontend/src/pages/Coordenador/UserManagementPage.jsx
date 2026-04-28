@@ -3,7 +3,7 @@ import {
     Container, Title, Table, Group, Text, Badge, ActionIcon, 
     Paper, Avatar, Button, TextInput, Select, LoadingOverlay, Pagination, Tooltip 
 } from '@mantine/core';
-import { IconPencil, IconTrash, IconSearch, IconUserPlus } from '@tabler/icons-react';
+import { IconPencil, IconTrash, IconSearch, IconUserPlus, IconUserCheck, IconUserX } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { modals } from '@mantine/modals'; 
 import api from '../../api/axios';
@@ -29,6 +29,23 @@ export default function UserManagementPage() {
             setLoading(false);
         }
     }
+
+    // --- NOVA FUNÇÃO: APROVAR / REVOGAR ACESSO ---
+    const handleToggleApproval = async (user) => {
+        try {
+            const response = await api.patch(`/admin/users/${user.id}/toggle-approval`);
+            notifications.show({ 
+                title: 'Sucesso', 
+                message: response.data.message, 
+                color: response.data.is_approved ? 'green' : 'yellow' 
+            });
+            // Atualiza a lista localmente para não precisar dar loadUsers() e perder a página atual
+            setUsers(current => current.map(u => u.id === user.id ? { ...u, is_approved: response.data.is_approved } : u));
+        } catch (error) {
+            console.error(error);
+            notifications.show({ title: 'Erro', message: error.response?.data?.error || 'Erro ao alterar status.', color: 'red' });
+        }
+    };
 
     // --- FUNÇÃO DE EDITAR (ABRE MODAL) ---
     const openEditModal = (user) => {
@@ -98,11 +115,41 @@ export default function UserManagementPage() {
                     {user.role}
                 </Badge>
             </Table.Td>
+            
+            {/* NOVA COLUNA: STATUS E APROVAÇÃO */}
+            <Table.Td>
+                <Group gap="xs">
+                    {user.is_verified ? (
+                        <Badge color="green" size="sm" variant="dot">E-mail Validado</Badge>
+                    ) : (
+                        <Badge color="red" size="sm" variant="dot">Pendente</Badge>
+                    )}
+                    
+                    {user.is_approved ? (
+                        <Badge color="green" size="sm" variant="filled">Aprovado</Badge>
+                    ) : (
+                        <Badge color="yellow" size="sm" variant="filled">Aguardando Liberação</Badge>
+                    )}
+                </Group>
+            </Table.Td>
+
             <Table.Td>
                 <Group gap={0} justify="flex-end">
+                    {/* NOVO BOTÃO: APROVAR/BLOQUEAR */}
+                    <Tooltip label={user.is_approved ? "Bloquear Acesso" : "Aprovar Acesso"}>
+                        <ActionIcon 
+                            variant="subtle" 
+                            color={user.is_approved ? "orange" : "teal"} 
+                            onClick={() => handleToggleApproval(user)}
+                        >
+                            {user.is_approved ? <IconUserX size={16} /> : <IconUserCheck size={16} />}
+                        </ActionIcon>
+                    </Tooltip>
+
                     <ActionIcon variant="subtle" color="gray" onClick={() => openEditModal(user)}>
                         <IconPencil size={16} />
                     </ActionIcon>
+                    
                     <ActionIcon variant="subtle" color="red" onClick={() => handleDelete(user)}>
                         <IconTrash size={16} />
                     </ActionIcon>
@@ -149,6 +196,7 @@ export default function UserManagementPage() {
                             <Table.Tr>
                                 <Table.Th>Usuário</Table.Th>
                                 <Table.Th>Cargo</Table.Th>
+                                <Table.Th>Status de Acesso</Table.Th>
                                 <Table.Th style={{textAlign: 'right'}}>Ações</Table.Th>
                             </Table.Tr>
                         </Table.Thead>

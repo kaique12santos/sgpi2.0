@@ -135,6 +135,7 @@ CREATE TABLE `users` (
   `role` enum('coordenador','professor') DEFAULT 'professor',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `is_verified` tinyint(1) DEFAULT '0',
+  `is_approved` TINYINT(1) DEFAULT '0',
   `verification_token` varchar(6) DEFAULT NULL,
   `reset_token` varchar(6) DEFAULT NULL,
   `reset_expires` datetime DEFAULT NULL,
