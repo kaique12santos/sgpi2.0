@@ -25,7 +25,7 @@ INSERT INTO disciplines (name, slug, course_level) VALUES
 ('Laboratório de Desenvolvimento','lab_dev_mult',6),
 ('Qualidade e Testes de Software','qualidade_testes',6);
 
-INSERT INTO users (name, email, password_hash, role, is_verified) 
+INSERT INTO users (name, email, password_hash, role, is_verified, is_approved) 
 VALUES (
     'Conta Master SGPI', 
     'sgpisuporte9@gmail.com', 
