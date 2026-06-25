@@ -75,7 +75,7 @@ class UserRepository {
      */
     async findAll() {
         const sql = `
-            SELECT id, name, email, role, created_at 
+            SELECT id, name, email, role, created_at, is_verified, is_approved 
             FROM users 
             ORDER BY name ASC
         `;

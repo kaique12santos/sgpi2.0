@@ -52,9 +52,10 @@ export const AuthProvider = ({ children }) => {
     }
 
     function signOut() {
-        localStorage.clear();
+        localStorage.removeItem('sgpi_user');
+        localStorage.removeItem('sgpi_token');
+        api.defaults.headers.Authorization = null;
         setUser(null);
-        api.defaults.headers.Authorization = undefined;
     }
 
     return (
